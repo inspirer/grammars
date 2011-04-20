@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/../org.textway.tools.converter/bin" />
+    <output-test url="file://$MODULE_DIR$/../org.textway.tools.converter/testsbin" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../org.textway.tools.converter">
+      <sourceFolder url="file://$MODULE_DIR$/../org.textway.tools.converter/src" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="groovy-1.7.10" level="application" />
+  </component>
+</module>
+

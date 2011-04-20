@@ -1,0 +1,11 @@
+*.xml text
+*.java text
+*.groovy text
+*.spec text
+*.sh eol=lf
+*.txt text
+.project text
+.name text
+*.iml text
+*.s eol=lf
+*.ltp eol=lf

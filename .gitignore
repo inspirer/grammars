@@ -1,0 +1,6 @@
+.DS_Store
+/tools/.idea/workspace.xml
+/tools/.idea/dictionaries
+/tools/build/
+/tools/libs/
+bin

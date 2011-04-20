@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project basedir="." default="all" name="org.textway.grammar.javascript">
+	<path id="lib.converter">
+		<fileset dir="../tools/libs" includes="*.jar"/>
+	</path>
+
+	<target name="all">
+		<java fork="true" classpathref="lib.converter" classname="org.textway.tools.converter.Converter" failonerror="true">
+			<arg line="js_lexer.spec"/>
+		</java>
+	</target>
+</project>
