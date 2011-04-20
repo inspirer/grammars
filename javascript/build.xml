@@ -5,8 +5,6 @@
 	</path>
 
 	<target name="all">
-		<java fork="true" classpathref="lib.converter" classname="org.textway.tools.converter.Converter" failonerror="true">
-			<arg line="js_lexer.spec"/>
-		</java>
+		<java fork="true" classpathref="lib.converter" classname="org.textway.tools.converter.Converter" failonerror="true"/>
 	</target>
 </project>

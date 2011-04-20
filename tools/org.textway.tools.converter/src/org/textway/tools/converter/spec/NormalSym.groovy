@@ -10,13 +10,13 @@ class NormalSym extends Sym {
 
     @Override
     void accept(String line) {
-        if(line =~ /^\[empty\]$/) {
+        if (line =~ /^\[empty\]$/) {
             // empty rule
-        } else if(line =~ /^any Unicode code unit$/) {
+        } else if (line =~ /^any Unicode code unit$/) {
             // ignore, TODO
-        } else if(line =~ /^any character in the Unicode categor(ies|y)/) {
+        } else if (line =~ /^any character in the Unicode categor(ies|y)/) {
             // ignore, TODO
-        } else if(line =~ /^(\w+)\s+but not \S+(or \S+)*/) {
+        } else if (line =~ /^(\w+)\s+but not \S+(or \S+)*/) {
             // ignore, TODO
         } else {
             def rule = line.split(/\s+/)

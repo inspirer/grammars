@@ -3,7 +3,7 @@ package org.textway.tools.converter.spec
 abstract class Sym {
 
     def name;
-    def isLexem;
+    def isLexem = false;
 
     Sym(name) {
         this.name = name
