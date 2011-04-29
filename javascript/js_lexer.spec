@@ -2,6 +2,9 @@
 # ECMAScript Language Specification
 #
 # http://www.ecma-international.org/publications/standards/Ecma-262.htm
+#
+# [butnot, lookahead, unicodecategories, emptyinbrackets, controlchars]
+# [butnot, emptyinbrackets, anyunicode]
 
 # A.1	Lexical Grammar
 
@@ -60,10 +63,10 @@ PostAsteriskCommentChars ::
 	* PostAsteriskCommentCharsopt
 
 MultiLineNotAsteriskChar ::
-	SourceCharacter but not asterisk *
+	SourceCharacter but not *
 
 MultiLineNotForwardSlashOrAsteriskChar ::
-	SourceCharacter but not forward-slash / or asterisk *
+	SourceCharacter but not / or *
 
 SingleLineComment ::
 	// SingleLineCommentCharsopt
@@ -211,12 +214,12 @@ SingleStringCharacters ::
 	SingleStringCharacter SingleStringCharactersopt
 
 DoubleStringCharacter :: 
-	SourceCharacter but not double-quote " or backslash \ or LineTerminator
+	SourceCharacter but not " or \ or LineTerminator
 	\ EscapeSequence
 	LineContinuation
 
 SingleStringCharacter :: 
-	SourceCharacter but not single-quote ' or backslash \ or LineTerminator
+	SourceCharacter but not ' or \ or LineTerminator
 	\ EscapeSequence
 	LineContinuation
 

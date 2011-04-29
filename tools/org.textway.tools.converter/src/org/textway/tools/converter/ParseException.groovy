@@ -1,9 +1,9 @@
 package org.textway.tools.converter
 
 class ParseException extends Exception {
-    int line
+    def line
 
-    ParseException(int line, String message) {
+    ParseException(def line, String message) {
         super(message)
         this.line = line
     }

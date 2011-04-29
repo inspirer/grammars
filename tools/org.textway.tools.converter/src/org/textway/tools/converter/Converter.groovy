@@ -31,7 +31,7 @@ class Converter {
             }
 
             try {
-                new SpecReader().read_lex(lexer);
+                new SpecReader().read(lexer, parser);
             } catch(ParseException ex) {
                 die(ex.toString());
             }
