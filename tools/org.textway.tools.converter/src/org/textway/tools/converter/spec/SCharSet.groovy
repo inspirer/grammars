@@ -7,6 +7,10 @@ class SCharSet implements SExpression {
         this.ranges = ranges.toList()
     }
 
+    SCharSet(List<Range<Integer>> ranges) {
+        this.ranges = ranges
+    }
+
     void accept(SVisitor visitor) {
     }
 }
