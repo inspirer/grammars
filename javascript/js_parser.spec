@@ -5,6 +5,7 @@
 
 ## style = lookahead, nonewline
 ## lexem = false
+## input = Program
 
 # A.3 Expressions
 

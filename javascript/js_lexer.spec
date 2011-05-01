@@ -131,7 +131,8 @@ Keyword :: one of
 	debugger	function	this		with
 	default		if			throw
 	delete		in			try
-
+# TODO: smart keywords? (used in PropertyAssignment) 
+	get set
 
 FutureReservedWord :: one of
 	class		enum		extends		super
@@ -152,8 +153,7 @@ Punctuator :: one of
 	>>=	>>>= &=	|=	^=
 
 DivPunctuator :: one of
-	/
-	/=
+	/   /=
 
 Literal ::
 	NullLiteral
@@ -187,6 +187,16 @@ DecimalDigits ::
 
 DecimalDigit :: one of
 	0 1 2 3 4 5 6 7 8 9
+
+# Note: the following two definitions are absent in A.1, they are taken from "7.8.3 Numeric Literals"
+	
+NonZeroDigit :: one of
+	1 2 3 4 5 6 7 8 9
+
+ExponentPart ::
+	ExponentIndicator SignedInteger
+
+# end of Note
 
 ExponentIndicator :: one of
 	e E
@@ -276,7 +286,10 @@ RegularExpressionChar ::
 	RegularExpressionClass
 
 RegularExpressionBackslashSequence ::
-	\ NonTerminator
+# Was (in A.1):
+#	\ NonTerminator
+# Patched (from 7.8.5):
+	\ RegularExpressionNonTerminator
 
 RegularExpressionNonTerminator ::
 	SourceCharacter but not LineTerminator
