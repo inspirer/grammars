@@ -1,13 +1,15 @@
-package org.textway.tools.converter.handlers
+package org.textway.tools.converter.handlers.line
 
 import org.textway.tools.converter.spec.SChoice
 import org.textway.tools.converter.spec.SSetDiff
 import org.textway.tools.converter.spec.SSymbol
 import org.textway.tools.converter.spec.SUtil
+import org.textway.tools.converter.handlers.LineHandler
+import org.textway.tools.converter.handlers.ReaderOptions
 
 class ButNotHandler implements LineHandler {
 
-    boolean tryHandle(SSymbol sym, String line, String location) {
+    boolean tryHandle(SSymbol sym, String line, String location, ReaderOptions opts) {
         def matcher;
         if ((matcher = line =~ /^(\w+)\s+but\s+not\s+(\S+)((\s*or\s+\S+)*)\s*$/)) {
             String origin = matcher[0][1];
@@ -22,8 +24,8 @@ class ButNotHandler implements LineHandler {
             }
             ((SChoice)sym.value).elements.add(
                     new SSetDiff(
-                            SUtil.create(origin, location),
-                            new SChoice(set.collect { SUtil.create(it, location) })));
+                            SUtil.create(origin, location, opts),
+                            new SChoice(set.collect { SUtil.create(it, location, opts) })));
             return true;
         }
         return false

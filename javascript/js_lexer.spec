@@ -2,9 +2,10 @@
 # ECMAScript Language Specification
 #
 # http://www.ecma-international.org/publications/standards/Ecma-262.htm
-#
-# [butnot, lookahead, unicodecategories, emptyinbrackets, controlchars]
-# [butnot, emptyinbrackets, anyunicode]
+
+## style = unicodecategories, emptyinbrackets, anyunicode, butnot, lookahead
+## lexem = true
+## populate = Keyword, FutureReservedWord, Punctuator, DivPunctuator, NullLiteral, BooleanLiteral
 
 # A.1	Lexical Grammar
 
@@ -42,7 +43,7 @@ LineTerminator ::
 
 LineTerminatorSequence ::
 	<LF>
-	<CR> [lookahead != <LF>] 
+	<CR> [lookahead != <LF>]
 	<LS>
 	<PS>
 	<CR> <LF>
@@ -52,7 +53,7 @@ Comment ::
 	SingleLineComment
 
 MultiLineComment ::
-	/* MultiLineCommentCharsopt */
+	/ * MultiLineCommentCharsopt * /
 
 MultiLineCommentChars :: 
 	MultiLineNotAsteriskChar MultiLineCommentCharsopt 
@@ -69,7 +70,7 @@ MultiLineNotForwardSlashOrAsteriskChar ::
 	SourceCharacter but not / or *
 
 SingleLineComment ::
-	// SingleLineCommentCharsopt
+	/ / SingleLineCommentCharsopt
 
 SingleLineCommentChars ::
 	SingleLineCommentChar SingleLineCommentCharsopt
@@ -105,7 +106,7 @@ IdentifierPart ::
 	<ZWJ>
 
 UnicodeLetter ::
-	any character in the Unicode categories "Uppercase letter (Lu)", "Lowercase letter (Ll)", "Titlecase letter (Lt)", "Modifier letter (Lm)", "Other letter (Lo)", or "Letter number (Nl)".
+	any character in the Unicode categories "Uppercase letter (Lu)", "Lowercase letter (Ll)", "Titlecase letter (Lt)", "Modifier letter (Lm)", "Other letter (Lo)", or "Letter number (Nl)"
 
 UnicodeCombiningMark ::
 	any character in the Unicode categories "Non-spacing mark (Mn)" or "Combining spacing mark (Mc)"

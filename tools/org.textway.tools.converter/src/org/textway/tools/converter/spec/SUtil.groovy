@@ -1,6 +1,7 @@
 package org.textway.tools.converter.spec
 
 import org.textway.tools.converter.ParseException
+import org.textway.tools.converter.handlers.ReaderOptions
 
 class SUtil {
 
@@ -51,7 +52,11 @@ class SUtil {
             "Pf": Character.FINAL_QUOTE_PUNCTUATION,
     ]
 
-    static SExpression create(String text, String location) {
+    static List<SExpression> create(String[] s, String location, ReaderOptions opts) {
+        return s.collect { SUtil.create(it, location, opts) }
+    }
+
+    static SExpression create(String text, String location, ReaderOptions opts) {
         def matcher = null;
         if ((matcher = text =~ /^<(\w{2,5})>$/)) {
             String cname = matcher[0][1];
@@ -62,7 +67,7 @@ class SUtil {
                 return getUnicodeCategory("Zs", location);
             }
             throw new ParseException(location, "unknown character id: $text");
-        } else if (text.length() == 1) {
+        } else if (opts.options['lexem'] && text.length() == 1) {
             return new SCharacter(text.charAt(0));
         } else {
             return new SReference(text, location);
@@ -103,5 +108,10 @@ class SUtil {
         }
         categorycache[name] = new SCharSet(result)
         return categorycache[name];
+    }
+
+    static SExpression mergeSets(List<SCharSet> sets) {
+        // TODO optimize, merge them
+        new SChoice(sets)
     }
 }

@@ -10,10 +10,6 @@ class SReference implements SExpression {
         this.location = location
     }
 
-    static List<SExpression> create(String[] s, String location) {
-        return s.collect { SUtil.create(it, location) }
-    }
-
     void accept(SVisitor visitor) {
         visitor.visit(this);
     }

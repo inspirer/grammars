@@ -3,6 +3,9 @@
 #
 # http://www.ecma-international.org/publications/standards/Ecma-262.htm
 
+## style = lookahead, nonewline
+## lexem = false
+
 # A.3 Expressions
 
 PrimaryExpression :

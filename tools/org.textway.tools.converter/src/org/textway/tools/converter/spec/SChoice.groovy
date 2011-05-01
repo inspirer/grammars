@@ -7,7 +7,7 @@ class SChoice implements SExpression {
         this.elements = elements.toList()
     }
 
-    SChoice(List<SExpression> elements) {
+    SChoice(List<? extends SExpression> elements) {
         this.elements = elements
     }
 
