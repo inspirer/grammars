@@ -1,15 +1,15 @@
-package org.textway.tools.converter
+package org.textway.tools.converter.handlers
 
 import org.textway.tools.converter.spec.SSymbol
 import org.textway.tools.converter.spec.SChoice
 import org.textway.tools.converter.spec.SReference
-import org.textway.tools.converter.handlers.HandlersFactory
+
 import org.textway.tools.converter.spec.SVisitor
 import org.textway.tools.converter.spec.SUtil
-import org.textway.tools.converter.handlers.ReaderOptions
-import org.textway.tools.converter.handlers.LineHandler
-import org.textway.tools.converter.handlers.LinePartHandler
+
 import org.textway.tools.converter.spec.SCharacter
+import org.textway.tools.converter.spec.SSequence
+import org.textway.tools.converter.spec.SLanguage
 
 class SpecReader {
 
@@ -50,20 +50,36 @@ class SpecReader {
         return result
     }
 
-    void populate(String sid, List<SSymbol> sym, Map<String,SSymbol> defined) {
-        // TODO better populate
+    void populate(String sid, List<SSymbol> syms, Map<String,SSymbol> defined) {
         if(defined[sid]) {
             ((SChoice)defined[sid].value).elements.each {
+              def text, location;
               if(it instanceof SReference) {
-                  defined[it.text] = defined[sid];
+                  text = it.text;
+                  location = it.location;
               } else if (it instanceof SCharacter) {
-                  defined[it.c.toString()] = defined[sid];
+                  text = it.c.toString();
+                  location = it.location
+              } else {
+                  throw new ParseException(defined[sid].location, "cannot populate ${sid}, unknown element: ${it}");
               }
+              if(defined[text]) {
+                  throw new ParseException(defined[sid].location, "cannot populate ${sid}, ${text} already exists");
+              }
+              def newsym = new SSymbol(text, location)
+              syms.add(newsym);
+              defined[text] = newsym;
+              newsym.isTerm = defined[sid].isTerm
+              newsym.value =
+                  text.length() == 1 ? new SCharacter(text.charAt(0), location) :
+                      new SSequence((text.toCharArray().collect { new SCharacter(it,location)}))
             }
+        } else {
+            throw new ParseException(0, "cannot populate `${sid}': unknown symbol");
         }
     }
 
-    def read(File l, File p) {
+    SLanguage read(File l, File p) {
         def lex = read(l);
         def parser = read(p);
 
@@ -87,12 +103,13 @@ class SpecReader {
                 String reference = ref.text;
                 if(reference.endsWith("opt")) {
                     reference = reference[0..-4];
+                    ref.isOptional = true;
                 }
 
                 ref.resolved = defined[reference];
                 if(ref.resolved == null) {
-                    //throw new ParseException(ref.location, "unresolved reference: ${ref.text}");
-                    println "${ref.location}: unresolved ${ref.text}";
+                    throw new ParseException(ref.location, "unresolved reference: ${ref.text}");
+                    //println "${ref.location}: unresolved ${ref.text}";
                 }
             }
 
@@ -100,6 +117,24 @@ class SpecReader {
         all.each {
             it.value.accept v
         }
+
+        def inputs = opts.options['input'].collect {
+            def sym = defined[it];
+            if (sym == null) {
+                throw new ParseException(0, "unresolved input symbol: ${it}");
+            }
+            return sym
+        };
+
+        opts.options['nonTerm'].each {
+            def sym = defined[it];
+            if (sym == null || !sym.isTerm) {
+                throw new ParseException(0, "cannot make nonterm: ${it}");
+            }
+            sym.isTerm = false;
+        }
+
+        return new SLanguage(all, inputs)
     }
 
     interface LineStrategy {

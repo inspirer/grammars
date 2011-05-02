@@ -1,6 +1,6 @@
 package org.textway.tools.converter.handlers.line
 
-import org.textway.tools.converter.ParseException
+import org.textway.tools.converter.handlers.ParseException
 import org.textway.tools.converter.handlers.LineHandler
 import org.textway.tools.converter.handlers.ReaderOptions
 import org.textway.tools.converter.spec.SCharSet

@@ -1,4 +1,4 @@
-package org.textway.tools.converter
+package org.textway.tools.converter.handlers
 
 class ParseException extends Exception {
     def line

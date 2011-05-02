@@ -1,6 +1,6 @@
 package org.textway.tools.converter.spec
 
-import org.textway.tools.converter.ParseException
+import org.textway.tools.converter.handlers.ParseException
 import org.textway.tools.converter.handlers.ReaderOptions
 
 class SUtil {
@@ -58,17 +58,19 @@ class SUtil {
 
     static SExpression create(String text, String location, ReaderOptions opts) {
         def matcher = null;
-        if ((matcher = text =~ /^<(\w{2,5})>$/)) {
+        if(opts.registry.partid2expr[text]) {
+            return opts.registry.partid2expr[text];
+        } else if ((matcher = text =~ /^<(\w{2,5})>$/)) {
             String cname = matcher[0][1];
             if(charmap[cname] != null) {
-                return new SCharacter(charmap[cname]);
+                return new SCharacter(charmap[cname], location);
             }
             if(cname.equals("USP")) {
                 return getUnicodeCategory("Zs", location);
             }
             throw new ParseException(location, "unknown character id: $text");
         } else if (opts.options['lexem'] && text.length() == 1) {
-            return new SCharacter(text.charAt(0));
+            return new SCharacter(text.charAt(0), location);
         } else {
             return new SReference(text, location);
         }

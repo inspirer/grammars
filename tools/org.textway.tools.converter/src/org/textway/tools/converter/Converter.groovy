@@ -1,5 +1,9 @@
 package org.textway.tools.converter
 
+import org.textway.tools.converter.handlers.SpecReader
+import org.textway.tools.converter.handlers.ParseException
+import org.textway.tools.converter.spec.SLanguage
+
 class Converter {
 
     static final def TITLE = "converter - textway grammar converter";
@@ -30,12 +34,27 @@ class Converter {
                 die("no parser .spec");
             }
 
+            SLanguage l;
             try {
-                new SpecReader().read(lexer, parser);
+                l = new SpecReader().read(lexer, parser);
+                l.name = prefix;
+                l.detectLexems()
+
             } catch(ParseException ex) {
                 die(ex.toString());
+                return;
             }
+
+            store(new File("${l.name}.s"), l)
         }
+    }
+
+    private static def store(File file, SLanguage l) {
+        PrintWriter pw = file.newPrintWriter()
+        pw.println("lang = \"java\"");
+        pw.println("prefix = \"${l.name}\"");
+        pw.println("\n# Lexer\n");
+        pw.close()
     }
 
     static void die(String... message) {

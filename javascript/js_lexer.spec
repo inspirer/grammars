@@ -6,6 +6,7 @@
 ## style = unicodecategories, emptyinbrackets, anyunicode, butnot, lookahead
 ## lexem = true
 ## populate = Keyword, FutureReservedWord, Punctuator, DivPunctuator, NullLiteral, BooleanLiteral
+## nonTerm = Literal
 
 # A.1	Lexical Grammar
 

@@ -1,10 +1,14 @@
 package org.textway.tools.converter.handlers
 
+import org.textway.tools.converter.spec.SExpression
+
 class PartsRegistry {
-    def partid2expr = [:]
+    Map<String,SExpression> partid2expr = [:]
     int counter = 1;
 
-    String nextId() {
-        return "_____partid" + counter++;
+    String nextId(SExpression expr) {
+        def s = "_____partid" + counter++
+        partid2expr[s] = expr;
+        return s;
     }
 }

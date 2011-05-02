@@ -3,7 +3,9 @@ package org.textway.tools.converter.spec
 class SReference implements SExpression {
     String text;
     String location;
+
     SSymbol resolved
+    boolean isOptional = false;
 
     SReference(String text, String location) {
         this.text = text

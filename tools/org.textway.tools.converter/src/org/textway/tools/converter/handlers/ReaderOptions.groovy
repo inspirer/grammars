@@ -1,18 +1,18 @@
 package org.textway.tools.converter.handlers
 
-import org.textway.tools.converter.ParseException
-
 class ReaderOptions {
     PartsRegistry registry = new PartsRegistry();
     def options = [
             'lexem': false,
             'populate': [],
             'style': [],
+            'input': [],
+            'nonTerm': [],
     ];
 
     void acceptLine(String line, String location) {
         def matcher = null;
-        if ((matcher = line =~ /^(style|populate)\s*=\s*([\w\-]+(\s*,\s*[\w\-]+)*)$/)) {
+        if ((matcher = line =~ /^(style|populate|input|nonTerm)\s*=\s*([\w\-]+(\s*,\s*[\w\-]+)*)$/)) {
             String key = matcher[0][1];
             String s = matcher[0][2];
             def settings = [];

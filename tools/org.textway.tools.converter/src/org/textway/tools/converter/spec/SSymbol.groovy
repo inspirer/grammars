@@ -1,6 +1,6 @@
 package org.textway.tools.converter.spec
 
-import org.textway.tools.converter.ParseException
+import org.textway.tools.converter.handlers.ParseException
 
 class SSymbol {
 
@@ -13,8 +13,13 @@ class SSymbol {
         this.name = name
         this.location = location;
 
-        if(name.endsWith("opt")) {
+        if (name.endsWith("opt")) {
             throw new ParseException(location, "symbol cannot end with opt : ${name}");
         }
+    }
+
+
+    public String toString() {
+        return "`" + name + '\''
     }
 }
