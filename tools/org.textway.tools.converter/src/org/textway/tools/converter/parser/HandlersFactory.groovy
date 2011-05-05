@@ -1,8 +1,8 @@
-package org.textway.tools.converter.handlers
+package org.textway.tools.converter.parser
 
-import org.textway.tools.converter.handlers.part.LookaheadPartDetector
-import org.textway.tools.converter.handlers.part.NoLineTerminatorPartDetector
-import org.textway.tools.converter.handlers.line.*
+import org.textway.tools.converter.parser.part.LookaheadPartDetector
+import org.textway.tools.converter.parser.part.NoLineTerminatorPartDetector
+import org.textway.tools.converter.parser.line.*
 
 class HandlersFactory {
 
@@ -13,9 +13,6 @@ class HandlersFactory {
             'unicodecategories': new UnicodeCategoriesHandler(),
             'lookahead': new LookaheadPartDetector(),
             'nonewline': new NoLineTerminatorPartDetector(),
-    ]
-
-    static def parthandlers = [
     ]
 
     static def defaultHandler = new DefaultHandler()

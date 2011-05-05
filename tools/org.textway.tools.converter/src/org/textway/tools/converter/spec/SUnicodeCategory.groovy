@@ -1,7 +1,5 @@
 package org.textway.tools.converter.spec
 
-class SLanguage {
-
+class SUnicodeCategory extends SExpression {
     String name;
-    List<SSymbol> all;
 }

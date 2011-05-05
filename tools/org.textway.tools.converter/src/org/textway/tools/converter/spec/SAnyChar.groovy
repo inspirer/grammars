@@ -1,6 +1,4 @@
 package org.textway.tools.converter.spec
 
-class SExpression {
-
-    String location;
+class SAnyChar extends SExpression {
 }

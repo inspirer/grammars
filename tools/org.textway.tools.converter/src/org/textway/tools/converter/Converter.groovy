@@ -1,8 +1,10 @@
 package org.textway.tools.converter
 
-import org.textway.tools.converter.handlers.SpecReader
-import org.textway.tools.converter.handlers.ParseException
+import org.textway.tools.converter.parser.SReader
+import org.textway.tools.converter.parser.ParseException
 import org.textway.tools.converter.spec.SLanguage
+
+import org.textway.tools.converter.writer.SWriter
 
 class Converter {
 
@@ -14,9 +16,9 @@ class Converter {
         }
 
         def filesmap = [] as Set
-        new File(".").eachFileMatch(~/.*_(lexer|parser)\.spec/) {
+        new File(".").eachFileMatch(~/.*\.spec/) {
             String name = it.getName();
-            filesmap += name.substring(0, name.lastIndexOf('_'));
+            filesmap += name.substring(0, name.lastIndexOf('.'));
         }
 
         def todo = (filesmap as List).sort();
@@ -24,37 +26,24 @@ class Converter {
             die(TITLE, "no .spec files found");
         }
 
-        for(def prefix in todo) {
-            def lexer = new File("${prefix}_lexer.spec");
-            if(!lexer.exists()) {
-                die("no lexer .spec");
-            }
-            def parser = new File("${prefix}_parser.spec");
-            if(!parser.exists()) {
-                die("no parser .spec");
+        for(String prefix in todo) {
+            def spec = new File("${prefix}.spec");
+            if(!spec.exists()) {
+                die("no file");
             }
 
             SLanguage l;
             try {
-                l = new SpecReader().read(lexer, parser);
-                l.name = prefix;
-                l.detectLexems()
+                l = new SReader().read(prefix, spec);
 
             } catch(ParseException ex) {
                 die(ex.toString());
                 return;
             }
 
-            store(new File("${l.name}.s"), l)
+            String content = new SWriter(l).write();
+            new File("${l.name}.spec_").write(content);
         }
-    }
-
-    private static def store(File file, SLanguage l) {
-        PrintWriter pw = file.newPrintWriter()
-        pw.println("lang = \"java\"");
-        pw.println("prefix = \"${l.name}\"");
-        pw.println("\n# Lexer\n");
-        pw.close()
     }
 
     static void die(String... message) {

@@ -1,4 +1,4 @@
-package org.textway.tools.converter.handlers
+package org.textway.tools.converter.parser
 
 interface LinePartHandler {
 

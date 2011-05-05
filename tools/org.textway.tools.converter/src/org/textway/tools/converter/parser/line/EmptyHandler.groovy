@@ -1,10 +1,10 @@
-package org.textway.tools.converter.handlers.line
+package org.textway.tools.converter.parser.line
 
 import org.textway.tools.converter.spec.SSequence
 import org.textway.tools.converter.spec.SSymbol
 import org.textway.tools.converter.spec.SChoice
-import org.textway.tools.converter.handlers.LineHandler
-import org.textway.tools.converter.handlers.ReaderOptions
+import org.textway.tools.converter.parser.LineHandler
+import org.textway.tools.converter.parser.ReaderOptions
 
 class EmptyHandler implements LineHandler {
     boolean tryHandle(SSymbol sym, String line, String location, ReaderOptions opts) {

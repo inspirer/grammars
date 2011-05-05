@@ -1,13 +1,18 @@
-package org.textway.tools.converter.handlers.line
+package org.textway.tools.converter.parser.line
 
-import org.textway.tools.converter.handlers.ParseException
-import org.textway.tools.converter.handlers.LineHandler
-import org.textway.tools.converter.handlers.ReaderOptions
-import org.textway.tools.converter.spec.SCharSet
+import org.textway.tools.converter.parser.LineHandler
+import org.textway.tools.converter.parser.ParseException
+import org.textway.tools.converter.parser.ReaderOptions
 import org.textway.tools.converter.spec.SChoice
 import org.textway.tools.converter.spec.SSymbol
+import org.textway.tools.converter.spec.SUnicodeCategory
 import org.textway.tools.converter.spec.SUtil
 
+/*
+ *   Samples:
+ *      any character in the Unicode categories "Uppercase letter (Lu)", "Lowercase letter (Ll)", "Titlecase letter (Lt)", "Modifier letter (Lm)", "Other letter (Lo)", or "Letter number (Nl)"
+ *      any character in the Unicode category "Decimal number (Nd)"
+ */
 class UnicodeCategoriesHandler implements LineHandler {
 
     boolean tryHandle(SSymbol sym, String line, String location, ReaderOptions opts) {
@@ -27,8 +32,8 @@ class UnicodeCategoriesHandler implements LineHandler {
                 throw new ParseException(location, "cannot parse unicode category line\n\ttail is `${tail}'");
             }
 
-            List<SCharSet> charsets = foundclasses.collect { SUtil.getUnicodeCategory(it, location) }
-            ((SChoice)sym.value).elements.add(SUtil.mergeSets(charsets))
+            List<SUnicodeCategory> charsets = foundclasses.collect { SUtil.createUnicodeCategory(it, location) }
+            ((SChoice)sym.value).elements.add(SUtil.createChoice(charsets, location))
             return true;
         }
         return false

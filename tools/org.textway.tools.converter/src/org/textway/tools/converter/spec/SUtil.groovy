@@ -1,24 +1,8 @@
 package org.textway.tools.converter.spec
 
-import org.textway.tools.converter.handlers.ParseException
-import org.textway.tools.converter.handlers.ReaderOptions
+import org.textway.tools.converter.parser.ParseException
 
 class SUtil {
-
-    static Map<String,Character> charmap = [
-            'ZWNJ': (Character) 0x200C,
-            'ZWJ': (Character) 0x200D,
-            'CR': (Character) '\r',
-            'LF': (Character) '\n',
-            'VT': (Character) 0x000B,
-            'FF': (Character) 0x000C,
-            'LS': (Character) 0x2028,
-            'PS': (Character) 0x2029,
-            'NBSP': (Character) 0x00A0,
-            'TAB': (Character) '\t',
-            'SP': (Character) 0x0020,
-            'BOM': (Character) 0xFEFF,
-    ]
 
     static def unicodecategory = [
             "Lu": Character.UPPERCASE_LETTER,
@@ -52,68 +36,116 @@ class SUtil {
             "Pf": Character.FINAL_QUOTE_PUNCTUATION,
     ]
 
-    static List<SExpression> create(String[] s, String location, ReaderOptions opts) {
-        return s.collect { SUtil.create(it, location, opts) }
+//    static Map<String,SCharSet> categorycache = [:]
+
+//    static SCharSet getUnicodeCategory(String name, String location) {
+//        if(categorycache.containsKey(name)){
+//            return categorycache[name];
+//        }
+//        if(!unicodecategory.containsKey(name)) {
+//            throw new ParseException(location, "unknown unicode category: ${name}");
+//        }
+//
+//        byte val = unicodecategory[name];
+//
+//        List<Range<Integer>> result = []
+//        int rangestart = -1;
+//        int rangelast = -1;
+//        for(int i = 0; i < 65536; i++) {
+//            if(Character.getType(i) == val) {
+//                if(rangestart >= 0 && rangelast < i -1) {
+//                    result.add(rangestart .. rangelast);
+//                    rangestart = -1;
+//                }
+//
+//                if(rangestart == -1) {
+//                    rangestart = rangelast = i;
+//                } else {
+//                    rangelast = i;
+//                }
+//            }
+//        }
+//        if(rangestart >= 0) {
+//            result.add(rangestart .. rangelast);
+//        }
+//        categorycache[name] = new SCharSet(result)
+//        return categorycache[name];
+//    }
+
+    static SAnyChar createAnyChar(String location) {
+        SAnyChar res = new SAnyChar();
+        res.location = location;
+        return res;
     }
 
-    static SExpression create(String text, String location, ReaderOptions opts) {
-        def matcher = null;
-        if(opts.registry.partid2expr[text]) {
-            return opts.registry.partid2expr[text];
-        } else if ((matcher = text =~ /^<(\w{2,5})>$/)) {
-            String cname = matcher[0][1];
-            if(charmap[cname] != null) {
-                return new SCharacter(charmap[cname], location);
-            }
-            if(cname.equals("USP")) {
-                return getUnicodeCategory("Zs", location);
-            }
-            throw new ParseException(location, "unknown character id: $text");
-        } else if (opts.options['lexem'] && text.length() == 1) {
-            return new SCharacter(text.charAt(0), location);
-        } else {
-            return new SReference(text, location);
-        }
+    static SCharacter createChar(char c, String location) {
+        SCharacter res = new SCharacter();
+        res.c = c
+        res.location = location
+        return res;
     }
 
-    static Map<String,SCharSet> categorycache = [:]
+    static SSetDiff createDiff(SExpression left, SExpression right, String location) {
+        SSetDiff res = new SSetDiff();
+        res.location = location;
+        res.left = left;
+        res.right = right;
+        return res;
+    }
 
-    static SCharSet getUnicodeCategory(String name, String location) {
-        if(categorycache.containsKey(name)){
-            return categorycache[name];
-        }
+    static SReference createReference(String text, String location) {
+        SReference res = new SReference();
+        res.internalText = text;
+        res.location = location;
+        return res;
+    }
+
+    static SChoice createChoice(List list, String location) {
+        SChoice res = new SChoice();
+        res.elements = list;
+        res.location = location;
+        return res;
+    }
+
+    static SSequence createSequence(List list, String location) {
+        SSequence res = new SSequence();
+        res.elements = list;
+        res.location = location;
+        return res;
+    }
+
+    static SUnicodeCategory createUnicodeCategory(String name, String location) {
         if(!unicodecategory.containsKey(name)) {
             throw new ParseException(location, "unknown unicode category: ${name}");
         }
-
-        byte val = unicodecategory[name];
-
-        List<Range<Integer>> result = []
-        int rangestart = -1;
-        int rangelast = -1;
-        for(int i = 0; i < 65536; i++) {
-            if(Character.getType(i) == val) {
-                if(rangestart >= 0 && rangelast < i -1) {
-                    result.add(rangestart .. rangelast);
-                    rangestart = -1;
-                }
-
-                if(rangestart == -1) {
-                    rangestart = rangelast = i;
-                } else {
-                    rangelast = i;
-                }
-            }
-        }
-        if(rangestart >= 0) {
-            result.add(rangestart .. rangelast);
-        }
-        categorycache[name] = new SCharSet(result)
-        return categorycache[name];
+        def res = new SUnicodeCategory();
+        res.name = name;
+        res.location = location;
+        return res;
     }
 
-    static SExpression mergeSets(List<SCharSet> sets) {
-        // TODO optimize, merge them
-        new SChoice(sets)
+    static SLookahead createLookahead(List terms, boolean inverted, String location) {
+        def res = new SLookahead();
+        res.terms = terms;
+        res.location = location;
+        res.inverted = inverted;
+        return res;
+    }
+
+    static SExpression createNoNewLine(String location) {
+        def res = new SNoNewLine();
+        res.location = location;
+        return res;
+    }
+
+    static SSymbol createSymbol(String name, String location) {
+        if (name.endsWith("opt")) {
+            throw new ParseException(location, "symbol cannot end with opt : ${name}");
+        }
+        def res = new SSymbol();
+        res.name = name;
+        res.location = location;
+        res.value = createChoice([], location);
+        return res;
     }
 }
