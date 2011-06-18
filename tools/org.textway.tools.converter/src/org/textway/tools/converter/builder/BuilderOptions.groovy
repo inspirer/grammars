@@ -11,13 +11,14 @@ class BuilderOptions {
             'delimeters': [],
             'nonTerm': [],
             'input': [],
+            'reserved': [],
     ];
 
     BuilderOptions() {
     }
 
     private boolean acceptLine(String key, String value, String location) {
-        if (key == 'delimeters' || key == 'nonTerm' || key == 'input') {
+        if (key == 'delimeters' || key == 'nonTerm' || key == 'input' || key == 'reserved') {
             def settings = [];
             value.split(/,/).each { settings.add(it.trim()) }
             options[key] = settings;

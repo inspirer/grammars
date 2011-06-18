@@ -13,6 +13,7 @@ class LanguageBuilder {
 
     List<SSymbol> inputs = [];
     List<SSymbol> delimeters = [];
+    List<SSymbol> reserved = [];
 
     LanguageBuilder(SLanguage language) {
         this.language = language
@@ -22,6 +23,13 @@ class LanguageBuilder {
     void markEntryPoints() {
         inputs.each { it.isEntry = true }
         delimeters.each { it.isEntry = true }
+        reserved.each {
+            if(it.value instanceof SChoice && ((SChoice)it.value).elements.any { ExpressionUtil.unwrap(it) instanceof SReference}) {
+                ((SChoice)it.value).elements.each { ((SReference)ExpressionUtil.unwrap(it)).resolved.isEntry = true; }
+            } else {
+                it.isEntry = true
+            }
+        }
         Queue<SSymbol> queue = new LinkedList<SSymbol>();
         queue.addAll(inputs);
         while (!queue.isEmpty()) {
@@ -46,7 +54,7 @@ class LanguageBuilder {
         // unused terms
         Set<SSymbol> usedTerms = language.all.findAll {it.isTerm && it.isEntry};
         queue.addAll(usedTerms);
-        while(!queue.isEmpty()) {
+        while (!queue.isEmpty()) {
             SSymbol first = queue.remove();
             for (SSymbol s: ExpressionUtil.getReferencedSymbols(first.value)) {
                 if (!usedTerms.contains(s)) {
@@ -67,11 +75,11 @@ class LanguageBuilder {
     }
 
     private void substituteLexemDefinitions() {
-        Map<SSymbol,Integer> sym2refsnumber = [:];
+        Map<SSymbol, Integer> sym2refsnumber = [:];
         for (SSymbol term: language.all.findAll {it.isTerm}) {
             def refs = ExpressionUtil.getReferences(term.value);
             for (SReference ref: refs) {
-                if(!ref.resolved.isTerm || ref.resolved.isEntry) continue;
+                if (!ref.resolved.isTerm || ref.resolved.isEntry) continue;
                 if (!sym2refsnumber.containsKey(ref.resolved)) {
                     sym2refsnumber[ref.resolved] = 1;
                 } else {
@@ -79,8 +87,8 @@ class LanguageBuilder {
                 }
             }
         }
-        for(SSymbol s : sym2refsnumber.keySet().findAll {sym2refsnumber[it] == 1}) {
-            //println(s.name)
+        for (SSymbol s: sym2refsnumber.keySet().findAll {sym2refsnumber[it] == 1}) {
+            println(s.name)
         }
     }
 
@@ -206,6 +214,17 @@ class LanguageBuilder {
             inp.isTerm = false;
         }
 
+        opts.options['reserved'].each {
+            if (!symbols.containsKey(it)) {
+                throw new ConvertException(optionsFile.getName(), "cannot resolve sym for reserved: ${it}");
+            }
+            SSymbol inp = symbols[it]
+            if (!inp.isTerm) {
+                throw new ConvertException(optionsFile.getName(), "reserved symbol should be term: ${it}");
+            }
+            reserved.add(inp)
+        }
+
         opts.options['delimeters'].each {
             if (!symbols.containsKey(it)) {
                 throw new ConvertException(optionsFile.getName(), "cannot resolve delimeter: ${it}");
@@ -214,7 +233,7 @@ class LanguageBuilder {
             if (!inp.isTerm) {
                 throw new ConvertException(optionsFile.getName(), "delimeter should be term: ${it}");
             }
-            delimeters.add(inp);
+            delimeters.add(inp)
         }
         if (delimeters.empty) {
             throw new ConvertException(optionsFile.getName(), "no delimeters defined");

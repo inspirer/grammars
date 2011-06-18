@@ -191,25 +191,25 @@ FutureReservedWord :: one of
 	class	enum	extends	super
 	const	export	import
 
-class ::
+class :: (lexem)
 	c l a s s
 
-enum ::
+enum :: (lexem)
 	e n u m
 
-extends ::
+extends :: (lexem)
 	e x t e n d s
 
-super ::
+super :: (lexem)
 	s u p e r
 
-const ::
+const :: (lexem)
 	c o n s t
 
-export ::
+export :: (lexem)
 	e x p o r t
 
-import ::
+import :: (lexem)
 	i m p o r t
 
 { :: (lexem)

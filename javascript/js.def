@@ -5,6 +5,7 @@
 
 # 0. Options
 
+reserved FutureReservedWord
 nonTerm  Literal, BooleanLiteral, NullLiteral
 delimeters  WhiteSpace, LineTerminator, Comment
 input Program
