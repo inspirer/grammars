@@ -1,5 +1,7 @@
 package org.textway.tools.converter.parser
 
+import org.textway.tools.converter.ConvertException
+
 class ReaderOptions {
     PartsRegistry registry = new PartsRegistry();
     def options = [
@@ -19,7 +21,7 @@ class ReaderOptions {
                 options[key] = settings;
             }
         } else {
-            throw new ParseException(location, "cannot handle settings\n\t${key}");
+            throw new ConvertException(location, "cannot handle settings\n\t${key}");
         }
     }
 }

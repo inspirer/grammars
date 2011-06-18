@@ -1,6 +1,6 @@
 package org.textway.tools.converter.spec
 
-import org.textway.tools.converter.parser.ParseException
+import org.textway.tools.converter.ConvertException
 
 class SUtil {
 
@@ -43,7 +43,7 @@ class SUtil {
 //            return categorycache[name];
 //        }
 //        if(!unicodecategory.containsKey(name)) {
-//            throw new ParseException(location, "unknown unicode category: ${name}");
+//            throw new ConvertException(location, "unknown unicode category: ${name}");
 //        }
 //
 //        byte val = unicodecategory[name];
@@ -116,7 +116,7 @@ class SUtil {
 
     static SUnicodeCategory createUnicodeCategory(String name, String location) {
         if (!unicodecategory.containsKey(name)) {
-            throw new ParseException(location, "unknown unicode category: ${name}");
+            throw new ConvertException(location, "unknown unicode category: ${name}");
         }
         def res = new SUnicodeCategory();
         res.name = name;
@@ -140,7 +140,7 @@ class SUtil {
 
     static SSymbol createSymbol(String name, String location) {
         if (name.endsWith("opt")) {
-            throw new ParseException(location, "symbol cannot end with opt : ${name}");
+            throw new ConvertException(location, "symbol cannot end with opt : ${name}");
         }
         def res = new SSymbol();
         res.name = name;

@@ -1,10 +1,10 @@
 package org.textway.tools.converter.regex
 
+import org.textway.tools.converter.ConvertException
 import org.textway.tools.converter.spec.SCharacter
-import org.textway.tools.converter.spec.SSequence
-import org.textway.tools.converter.spec.SExpression
-import org.textway.tools.converter.parser.ParseException
 import org.textway.tools.converter.spec.SChoice
+import org.textway.tools.converter.spec.SExpression
+import org.textway.tools.converter.spec.SSequence
 
 class RegexUtil {
 
@@ -33,13 +33,13 @@ class RegexUtil {
 
     private boolean handleRegexp(SExpression expr, StringBuilder sb) {
         if (expr == null) {
-            throw new ParseException(expr.location, "null expression");
+            throw new ConvertException(expr.location, "null expression");
         }
 
         if (expr instanceof SChoice) {
             int size = expr.elements.size();
             if (size == 0) {
-                throw new ParseException(expr.location, "empty choice");
+                throw new ConvertException(expr.location, "empty choice");
             } else if (size == 1) {
                 handleRegexp(expr.elements.first(), sb);
             } else {

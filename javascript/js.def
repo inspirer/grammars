@@ -5,6 +5,6 @@
 
 # 0. Options
 
-nonTerm  Literal
+nonTerm  Literal, BooleanLiteral, NullLiteral
 delimeters  WhiteSpace, LineTerminator, Comment
 input Program

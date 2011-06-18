@@ -1,5 +1,6 @@
 package org.textway.tools.converter.parser
 
+import org.textway.tools.converter.ConvertException
 import org.textway.tools.converter.spec.SExpression
 
 class SReaderUtil {
@@ -35,7 +36,7 @@ class SReaderUtil {
             if (cname.equals("USP")) {
                 return org.textway.tools.converter.spec.SUtil.createUnicodeCategory("Zs", location);
             }
-            throw new ParseException(location, "unknown character id: $text");
+            throw new ConvertException(location, "unknown character id: $text");
         } else if (opts.options['lexem'] && text.length() == 1) {
             return org.textway.tools.converter.spec.SUtil.createChar(text.charAt(0), location);
         } else {

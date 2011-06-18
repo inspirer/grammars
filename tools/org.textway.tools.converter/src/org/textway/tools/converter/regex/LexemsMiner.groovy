@@ -1,7 +1,7 @@
 package org.textway.tools.converter.regex
 
-import org.textway.tools.converter.spec.SSymbol
 import org.textway.tools.converter.spec.SLanguage
+import org.textway.tools.converter.spec.SSymbol
 
 class LexemsMiner {
 

@@ -6,6 +6,7 @@ class SSymbol {
     String location;
     SExpression value;
     boolean isTerm = false;
+    boolean isEntry = false;
 
     String toString() {
         return "`" + name + "'"

@@ -1,7 +1,7 @@
 package org.textway.tools.converter.parser.line
 
+import org.textway.tools.converter.ConvertException
 import org.textway.tools.converter.parser.LineHandler
-import org.textway.tools.converter.parser.ParseException
 import org.textway.tools.converter.parser.ReaderOptions
 import org.textway.tools.converter.spec.SChoice
 import org.textway.tools.converter.spec.SSymbol
@@ -29,7 +29,7 @@ class UnicodeCategoriesHandler implements LineHandler {
                 }
             }
             if (!tail.isEmpty()) {
-                throw new ParseException(location, "cannot parse unicode category line\n\ttail is `${tail}'");
+                throw new ConvertException(location, "cannot parse unicode category line\n\ttail is `${tail}'");
             }
 
             List<SUnicodeCategory> charsets = foundclasses.collect { SUtil.createUnicodeCategory(it, location) }

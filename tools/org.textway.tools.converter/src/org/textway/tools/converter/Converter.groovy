@@ -1,9 +1,8 @@
 package org.textway.tools.converter
 
+import org.textway.tools.converter.builder.LanguageBuilder
 import org.textway.tools.converter.parser.SReader
-import org.textway.tools.converter.parser.ParseException
 import org.textway.tools.converter.spec.SLanguage
-
 import org.textway.tools.converter.writer.SWriter
 
 class Converter {
@@ -36,13 +35,29 @@ class Converter {
             try {
                 l = new SReader().read(prefix, spec);
 
-            } catch (ParseException ex) {
+            } catch (ConvertException ex) {
                 die(ex.toString());
                 return;
             }
 
-            String content = new SWriter(l).write();
+            String content = new SWriter(l, 0).write();
             new File("${l.name}.0.spec").write(content);
+
+            def opts = new File("${prefix}.def");
+            if (!opts.exists()) {
+                die("no file: ${prefix}.def");
+            }
+            LanguageBuilder builder = new LanguageBuilder(l);
+            try {
+                builder.prepare(opts)
+                builder.markEntryPoints()
+            } catch (ConvertException ex) {
+                die(ex.toString());
+                return;
+            }
+
+            content = new SWriter(l, 1).write();
+            new File("${l.name}.1.spec").write(content);
         }
     }
 

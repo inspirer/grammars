@@ -1,5 +1,6 @@
 package org.textway.tools.converter.parser
 
+import org.textway.tools.converter.ConvertException
 import org.textway.tools.converter.spec.*
 
 class Resolver {
@@ -55,10 +56,10 @@ class Resolver {
                     text = it.c.toString();
                     location = it.location
                 } else {
-                    throw new ParseException(defined[sid].location, "cannot expand ${sid}, unknown element: ${it}");
+                    throw new ConvertException(defined[sid].location, "cannot expand ${sid}, unknown element: ${it}");
                 }
                 if (defined[text]) {
-                    throw new ParseException(defined[sid].location, "cannot expand ${sid}, ${text} already exists");
+                    throw new ConvertException(defined[sid].location, "cannot expand ${sid}, ${text} already exists");
                 }
                 def newsym = SUtil.createSymbol(text, location)
                 language.all.add(language.all.indexOf(defined[sid]) + 1, newsym);
@@ -69,7 +70,7 @@ class Resolver {
                         SUtil.createSequence((text.toCharArray().collect { SUtil.createChar(it, location)}), location)
             }
         } else {
-            throw new ParseException(0, "cannot expand `${sid}': unknown symbol");
+            throw new ConvertException(0, "cannot expand `${sid}': unknown symbol");
         }
     }
 
@@ -82,7 +83,7 @@ class Resolver {
 
         ref.resolved = defined[reference];
         if (ref.resolved == null) {
-            throw new ParseException(ref.location, "unresolved reference: ${ref.internalText}");
+            throw new ConvertException(ref.location, "unresolved reference: ${ref.internalText}");
             //println "${ref.location}: unresolved ${ref.internalText}";
         }
     }

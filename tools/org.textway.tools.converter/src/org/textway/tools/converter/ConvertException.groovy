@@ -1,9 +1,9 @@
-package org.textway.tools.converter.parser
+package org.textway.tools.converter
 
-class ParseException extends Exception {
+class ConvertException extends Exception {
     def location
 
-    ParseException(def location, String message) {
+    ConvertException(def location, String message) {
         super(message)
         this.location = location
     }

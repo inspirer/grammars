@@ -1,24 +1,13 @@
 package org.textway.tools.converter.writer
 
-import org.textway.tools.converter.spec.SLanguage
-import org.textway.tools.converter.spec.SSymbol
-import org.textway.tools.converter.spec.SChoice
-import org.textway.tools.converter.spec.SExpression
-import org.textway.tools.converter.spec.SSequence
-import org.textway.tools.converter.spec.SCharacter
-import org.textway.tools.converter.spec.SAnyChar
-import org.textway.tools.converter.spec.SLookahead
-import org.textway.tools.converter.spec.SUnicodeCategory
-import org.textway.tools.converter.spec.SSetDiff
-import org.textway.tools.converter.spec.SNoNewLine
-import org.textway.tools.converter.spec.SReference
+import org.textway.tools.converter.spec.*
 
 class SWriter {
 
     SLanguage language;
     StringBuilder sb;
 
-    SWriter(SLanguage language) {
+    SWriter(SLanguage language, int level) {
         this.language = language
         sb = new StringBuilder();
     }
@@ -36,14 +25,14 @@ class SWriter {
 
         boolean isOneOf = false;
         if (s.isTerm) {
-            isOneOf = s.value instanceof SChoice &&
+            isOneOf = !s.isEntry && s.value instanceof SChoice &&
                     ((SChoice) s.value).elements.size() > 6 &&
                     (((SChoice) s.value).elements.any {it instanceof SCharacter} ||
                             ((SChoice) s.value).elements.any {it instanceof SReference});
             if (isOneOf) {
                 sb.append(" :: one of\n")
             } else {
-                sb.append(" ::\n")
+                sb.append(s.isEntry ? " :: (lexem)\n" : " ::\n")
             }
         } else {
             sb.append(" :\n");
