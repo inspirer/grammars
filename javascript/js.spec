@@ -54,8 +54,8 @@ Comment ::
 MultiLineComment ::
 	/ * MultiLineCommentCharsopt * /
 
-MultiLineCommentChars :: 
-	MultiLineNotAsteriskChar MultiLineCommentCharsopt 
+MultiLineCommentChars ::
+	MultiLineNotAsteriskChar MultiLineCommentCharsopt
 	* PostAsteriskCommentCharsopt
 
 PostAsteriskCommentChars ::
@@ -93,14 +93,14 @@ IdentifierName ::
 IdentifierStart ::
 	UnicodeLetter
 	$
-	_ 
+	_
 	\ UnicodeEscapeSequence
 
 IdentifierPart ::
 	IdentifierStart
 	UnicodeCombiningMark
 	UnicodeDigit
-	UnicodeConnectorPunctuation 
+	UnicodeConnectorPunctuation
 	<ZWNJ>
 	<ZWJ>
 
@@ -202,11 +202,11 @@ ExponentIndicator :: one of
 
 SignedInteger ::
 	DecimalDigits
-	+ DecimalDigits 
+	+ DecimalDigits
 	- DecimalDigits
 
 HexIntegerLiteral ::
-	0 x HexDigit 
+	0 x HexDigit
 	0 X HexDigit
 	HexIntegerLiteral HexDigit
 
@@ -223,12 +223,12 @@ DoubleStringCharacters ::
 SingleStringCharacters ::
 	SingleStringCharacter SingleStringCharactersopt
 
-DoubleStringCharacter :: 
+DoubleStringCharacter ::
 	SourceCharacter but not " or \ or LineTerminator
 	\ EscapeSequence
 	LineContinuation
 
-SingleStringCharacter :: 
+SingleStringCharacter ::
 	SourceCharacter but not ' or \ or LineTerminator
 	\ EscapeSequence
 	LineContinuation

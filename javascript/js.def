@@ -1,4 +1,9 @@
-# 
+# Standard ECMA-262, 5th Edition, December 2009
+# ECMAScript Language Specification
+#
+# http://www.ecma-international.org/publications/standards/Ecma-262.htm
+
+# 0. Options
 
 nonTerm  Literal
 delimeters  WhiteSpace, LineTerminator, Comment

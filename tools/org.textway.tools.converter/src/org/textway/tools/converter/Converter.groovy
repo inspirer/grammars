@@ -16,7 +16,7 @@ class Converter {
         }
 
         def filesmap = [] as Set
-        new File(".").eachFileMatch(~/.*\.spec/) {
+        new File(".").eachFileMatch(~/^[^\.]*\.spec$/) {
             String name = it.getName();
             filesmap += name.substring(0, name.lastIndexOf('.'));
         }
