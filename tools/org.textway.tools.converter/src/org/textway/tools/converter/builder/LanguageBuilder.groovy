@@ -19,13 +19,72 @@ class LanguageBuilder {
         language.all.each { symbols[it.name] = it; }
     }
 
+    void markEntryPoints() {
+        inputs.each { it.isEntry = true }
+        delimeters.each { it.isEntry = true }
+        Queue<SSymbol> queue = new LinkedList<SSymbol>();
+        queue.addAll(inputs);
+        while (!queue.isEmpty()) {
+            SSymbol first = queue.remove();
+            assert first.isEntry;
+            for (SSymbol s: ExpressionUtil.getReferencedSymbols(first.value)) {
+                if (!s.isEntry) {
+                    s.isEntry = true;
+                    if (!s.isTerm) {
+                        queue.add(s);
+                    }
+                }
+            }
+        }
+
+        for (SSymbol s: language.all) {
+            if (!s.isTerm && !s.isEntry) {
+                throw new ConvertException(s.location, "non-term ${s.name} is not used");
+            }
+        }
+
+        // unused terms
+        Set<SSymbol> usedTerms = language.all.findAll {it.isTerm && it.isEntry};
+        queue.addAll(usedTerms);
+        while(!queue.isEmpty()) {
+            SSymbol first = queue.remove();
+            for (SSymbol s: ExpressionUtil.getReferencedSymbols(first.value)) {
+                if (!usedTerms.contains(s)) {
+                    usedTerms.add(s);
+                    queue.add(s);
+                }
+            }
+        }
+
+        language.all.retainAll { it.isEntry || usedTerms.contains(it) }
+    }
+
     void eliminateRecursionInTerms() {
         for (SSymbol term: language.all.findAll {it.isTerm}) {
-            eliminateRecursionInTerm(term);
+            eliminateSelfRecursionInTerm(term);
+        }
+        substituteLexemDefinitions();
+    }
+
+    private void substituteLexemDefinitions() {
+        Map<SSymbol,Integer> sym2refsnumber = [:];
+        for (SSymbol term: language.all.findAll {it.isTerm}) {
+            def refs = ExpressionUtil.getReferences(term.value);
+            for (SReference ref: refs) {
+                if(!ref.resolved.isTerm || ref.resolved.isEntry) continue;
+                if (!sym2refsnumber.containsKey(ref.resolved)) {
+                    sym2refsnumber[ref.resolved] = 1;
+                } else {
+                    sym2refsnumber[ref.resolved]++;
+                }
+            }
+        }
+        for(SSymbol s : sym2refsnumber.keySet().findAll {sym2refsnumber[it] == 1}) {
+            //println(s.name)
         }
     }
 
-    private void eliminateRecursionInTerm(SSymbol term) {
+    private void eliminateSelfRecursionInTerm(SSymbol term) {
         if (!(term.value instanceof SChoice)) return;
 
         def rules = ((SChoice) term.value).elements;
@@ -116,31 +175,6 @@ class LanguageBuilder {
             def builder = new StringBuilder()
             RegexUtil.handleRegexp(lexem.value, builder);
             lexem.value = RegexUtil.create(builder.toString(), lexem.location);
-        }
-    }
-
-    void markEntryPoints() {
-        inputs.each { it.isEntry = true }
-        delimeters.each { it.isEntry = true }
-        Queue<SSymbol> queue = new LinkedList<SSymbol>();
-        queue.addAll(inputs);
-        while (!queue.isEmpty()) {
-            SSymbol first = queue.remove();
-            assert first.isEntry;
-            for (SSymbol s: ExpressionUtil.getReferencedSymbols(first.value)) {
-                if (!s.isEntry) {
-                    s.isEntry = true;
-                    if (!s.isTerm) {
-                        queue.add(s);
-                    }
-                }
-            }
-        }
-
-        for (SSymbol s: language.all) {
-            if (!s.isTerm && !s.isEntry) {
-                throw new ConvertException(s.location, "non-term ${s.name} is not used");
-            }
         }
     }
 

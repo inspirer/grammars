@@ -3,20 +3,6 @@
 SourceCharacter ::
 	[anychar]
 
-InputElementDiv ::
-	WhiteSpace
-	LineTerminator
-	Comment
-	Token
-	DivPunctuator
-
-InputElementRegExp ::
-	WhiteSpace
-	LineTerminator
-	Comment
-	Token
-	RegularExpressionLiteral
-
 WhiteSpace :: (lexem)
 	<TAB>
 	<VT>
@@ -66,12 +52,6 @@ SingleLineCommentChars ::
 
 SingleLineCommentChar ::
 	SourceCharacter but not LineTerminator
-
-Token ::
-	IdentifierName
-	Punctuator
-	NumericLiteral
-	StringLiteral
 
 Identifier :: (lexem)
 	IdentifierName but not ReservedWord
@@ -229,16 +209,6 @@ export ::
 import ::
 	i m p o r t
 
-Punctuator :: one of
-	{	}	(	)	[	]
-	.	;	,	<	>	<=
-	>=	==	!=	===	!==	+
-	-	*	%	++	--	<<
-	>>	>>>	&	|	^	!
-	~	&&	||	?	:	=
-	+=	-=	*=	%=	<<=	>>=
-	>>>=	&=	|=	^=
-
 { :: (lexem)
 	{
 
@@ -377,10 +347,6 @@ Punctuator :: one of
 ^= :: (lexem)
 	^ =
 
-DivPunctuator ::
-	/
-	/=
-
 / :: (lexem)
 	/
 
@@ -392,6 +358,7 @@ Literal :
 	BooleanLiteral
 	NumericLiteral
 	StringLiteral
+	RegularExpressionLiteral
 
 NullLiteral :
 	null
@@ -506,7 +473,7 @@ HexEscapeSequence ::
 UnicodeEscapeSequence ::
 	u HexDigit HexDigit HexDigit HexDigit
 
-RegularExpressionLiteral ::
+RegularExpressionLiteral :: (lexem)
 	/ RegularExpressionBody / RegularExpressionFlags
 
 RegularExpressionBody ::

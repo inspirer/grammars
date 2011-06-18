@@ -159,6 +159,8 @@ Literal ::
 	BooleanLiteral
 	NumericLiteral
 	StringLiteral
+# Note: the following definition is absent in A.1, it is taken from "7.8 Literals"
+	RegularExpressionLiteral
 
 NullLiteral ::
 	null

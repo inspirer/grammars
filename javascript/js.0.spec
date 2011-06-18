@@ -390,6 +390,7 @@ Literal ::
 	BooleanLiteral
 	NumericLiteral
 	StringLiteral
+	RegularExpressionLiteral
 
 NullLiteral ::
 	null
