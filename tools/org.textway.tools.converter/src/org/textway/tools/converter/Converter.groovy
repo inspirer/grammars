@@ -34,32 +34,38 @@ class Converter {
             SLanguage l;
             try {
                 l = new SReader().read(prefix, spec);
+                save(l, 0)
+
+                process(l);
 
             } catch (ConvertException ex) {
                 die(ex.toString());
                 return;
             }
-
-            String content = new SWriter(l, 0).write();
-            new File("${l.name}.0.spec").write(content);
-
-            def opts = new File("${prefix}.def");
-            if (!opts.exists()) {
-                die("no file: ${prefix}.def");
-            }
-            LanguageBuilder builder = new LanguageBuilder(l);
-            try {
-                builder.prepare(opts)
-                builder.markEntryPoints()
-            } catch (ConvertException ex) {
-                die(ex.toString());
-                return;
-            }
-
-            content = new SWriter(l, 1).write();
-            new File("${l.name}.1.spec").write(content);
         }
     }
+
+    static void process(SLanguage lang) {
+        def opts = new File("${lang.name}.def");
+        if (!opts.exists()) {
+            die("no file: ${lang.name}.def");
+        }
+        LanguageBuilder builder = new LanguageBuilder(lang);
+        builder.prepare(opts)
+        builder.markEntryPoints()
+
+        save(lang, 1)
+
+        builder.eliminateRecursionInTerms()
+
+        save(lang, 2)
+    }
+
+    static void save(SLanguage lang, int step) {
+        String content = new SWriter(lang, step).write();
+        new File("${lang.name}.${step}.spec").write(content);
+    }
+
 
     static void die(String... message) {
         message.each { println it }

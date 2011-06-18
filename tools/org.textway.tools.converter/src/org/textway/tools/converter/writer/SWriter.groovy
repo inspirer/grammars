@@ -1,5 +1,7 @@
 package org.textway.tools.converter.writer
 
+import org.textway.tools.converter.builder.RegexUtil
+import org.textway.tools.converter.syntax.SRegexp
 import org.textway.tools.converter.spec.*
 
 class SWriter {
@@ -71,7 +73,8 @@ class SWriter {
             if (e.elements == null || e.elements.isEmpty()) {
                 return "[empty]";
             }
-            return e.elements.collect { asString(it, true) }.join(" ");
+            if (e.elements.size() < 2) needParens = false;
+            return (needParens ? "(" : "") + e.elements.collect { asString(it, true) }.join(" ") + (needParens ? ")" : "");
         } else if (e instanceof SChoice) {
             return (needParens ? "(" : "") + e.elements.collect { asString(it, false) }.join(" or ") + (needParens ? ")" : "");
         } else if (e instanceof SCharacter) {
@@ -88,6 +91,10 @@ class SWriter {
             return "[no LineTerminator here]";
         } else if (e instanceof SReference) {
             return e.resolved.name + (e.isOptional ? "opt" : "");
+        } else if (e instanceof SRegexp) {
+            return ((SRegexp) e).text
+        } else if (e instanceof SQuantifier) {
+            return asString(e.inner, true) + RegexUtil.quantifierAsString(e.min, e.max)
         }
         return "[????????]";
     }

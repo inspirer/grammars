@@ -138,6 +138,14 @@ class SUtil {
         return res;
     }
 
+    static SExpression createQuantifier(SExpression inner, int min, int max) {
+        def res = new SQuantifier()
+        res.min = min;
+        res.max = max;
+        res.inner = inner;
+        return res;
+    }
+
     static SSymbol createSymbol(String name, String location) {
         if (name.endsWith("opt")) {
             throw new ConvertException(location, "symbol cannot end with opt : ${name}");
