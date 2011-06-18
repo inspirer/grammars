@@ -20,20 +20,20 @@ class UnicodeCategoriesHandler implements LineHandler {
         if ((matcher = line =~ /^any character in the Unicode categor(ies|y)\s*(.*)$/)) {
             String tail = matcher[0][2]
             def foundclasses = []
-            while((matcher = tail =~ /^"([\-\w\s]+\((\w+)\))"/)) {
+            while ((matcher = tail =~ /^"([\-\w\s]+\((\w+)\))"/)) {
                 String charclass = matcher[0][2];
                 foundclasses.add(charclass);
                 tail = tail.substring(matcher.end());
-                if((matcher = tail =~ /^\s*(,(\s*or)?|or)\s*/)) {
+                if ((matcher = tail =~ /^\s*(,(\s*or)?|or)\s*/)) {
                     tail = tail.substring(matcher.end());
                 }
             }
-            if(!tail.isEmpty()) {
+            if (!tail.isEmpty()) {
                 throw new ParseException(location, "cannot parse unicode category line\n\ttail is `${tail}'");
             }
 
             List<SUnicodeCategory> charsets = foundclasses.collect { SUtil.createUnicodeCategory(it, location) }
-            ((SChoice)sym.value).elements.add(SUtil.createChoice(charsets, location))
+            ((SChoice) sym.value).elements.add(SUtil.createChoice(charsets, location))
             return true;
         }
         return false

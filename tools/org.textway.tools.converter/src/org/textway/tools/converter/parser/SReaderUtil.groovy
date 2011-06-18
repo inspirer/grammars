@@ -4,7 +4,7 @@ import org.textway.tools.converter.spec.SExpression
 
 class SReaderUtil {
 
-    static Map<String,Character> charmap = [
+    static Map<String, Character> charmap = [
             'ZWNJ': (Character) 0x200C,
             'ZWJ': (Character) 0x200D,
             'CR': (Character) '\r',
@@ -25,14 +25,14 @@ class SReaderUtil {
 
     static SExpression create(String text, String location, ReaderOptions opts) {
         def matcher = null;
-        if(opts.registry.partid2expr[text]) {
+        if (opts.registry.partid2expr[text]) {
             return opts.registry.partid2expr[text];
         } else if ((matcher = text =~ /^<(\w{2,5})>$/)) {
             String cname = matcher[0][1];
-            if(charmap[cname] != null) {
+            if (charmap[cname] != null) {
                 return org.textway.tools.converter.spec.SUtil.createChar(charmap[cname], location);
             }
-            if(cname.equals("USP")) {
+            if (cname.equals("USP")) {
                 return org.textway.tools.converter.spec.SUtil.createUnicodeCategory("Zs", location);
             }
             throw new ParseException(location, "unknown character id: $text");

@@ -115,7 +115,7 @@ class SUtil {
     }
 
     static SUnicodeCategory createUnicodeCategory(String name, String location) {
-        if(!unicodecategory.containsKey(name)) {
+        if (!unicodecategory.containsKey(name)) {
             throw new ParseException(location, "unknown unicode category: ${name}");
         }
         def res = new SUnicodeCategory();

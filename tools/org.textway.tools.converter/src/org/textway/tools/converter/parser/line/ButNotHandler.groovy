@@ -1,12 +1,11 @@
 package org.textway.tools.converter.parser.line
 
-import org.textway.tools.converter.spec.SChoice
-
-import org.textway.tools.converter.spec.SSymbol
-import org.textway.tools.converter.spec.SUtil
 import org.textway.tools.converter.parser.LineHandler
 import org.textway.tools.converter.parser.ReaderOptions
 import org.textway.tools.converter.parser.SReaderUtil
+import org.textway.tools.converter.spec.SChoice
+import org.textway.tools.converter.spec.SSymbol
+import org.textway.tools.converter.spec.SUtil
 
 /*
  *  Samples:
@@ -28,7 +27,7 @@ class ButNotHandler implements LineHandler {
                 }
                 assert tail.isEmpty();
             }
-            ((SChoice)sym.value).elements.add(
+            ((SChoice) sym.value).elements.add(
                     SUtil.createDiff(
                             SReaderUtil.create(origin, location, opts),
                             SUtil.createChoice(set.collect { SReaderUtil.create(it, location, opts) }, location),

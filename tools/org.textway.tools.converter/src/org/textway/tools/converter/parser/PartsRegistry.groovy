@@ -3,7 +3,7 @@ package org.textway.tools.converter.parser
 import org.textway.tools.converter.spec.SExpression
 
 class PartsRegistry {
-    Map<String,SExpression> partid2expr = [:]
+    Map<String, SExpression> partid2expr = [:]
     int counter = 1;
 
     String nextId(SExpression expr) {

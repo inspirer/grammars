@@ -2,7 +2,6 @@ package org.textway.tools.converter.parser.part
 
 import org.textway.tools.converter.parser.LinePartHandler
 import org.textway.tools.converter.parser.ReaderOptions
-import org.textway.tools.converter.spec.SNoNewLine
 import org.textway.tools.converter.spec.SUtil
 
 /*

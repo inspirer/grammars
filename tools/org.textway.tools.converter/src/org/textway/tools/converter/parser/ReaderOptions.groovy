@@ -9,10 +9,10 @@ class ReaderOptions {
     ];
 
     void acceptLine(String key, String value, String location) {
-        if(key == 'parser' || key == 'lexer' || key == 'expand') {
+        if (key == 'parser' || key == 'lexer' || key == 'expand') {
             def settings = [];
             value.split(/,/).each { settings.add(it.trim()) }
-            if(key == 'parser' || key == 'lexer') {
+            if (key == 'parser' || key == 'lexer') {
                 options['style'] = settings;
                 options['lexem'] = key == 'lexer';
             } else {

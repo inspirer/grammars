@@ -26,9 +26,9 @@ class Converter {
             die(TITLE, "no .spec files found");
         }
 
-        for(String prefix in todo) {
+        for (String prefix in todo) {
             def spec = new File("${prefix}.spec");
-            if(!spec.exists()) {
+            if (!spec.exists()) {
                 die("no file");
             }
 
@@ -36,7 +36,7 @@ class Converter {
             try {
                 l = new SReader().read(prefix, spec);
 
-            } catch(ParseException ex) {
+            } catch (ParseException ex) {
                 die(ex.toString());
                 return;
             }

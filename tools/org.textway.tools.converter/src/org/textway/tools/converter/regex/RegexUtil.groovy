@@ -9,7 +9,7 @@ import org.textway.tools.converter.spec.SChoice
 class RegexUtil {
 
     String toRegexp(char c, boolean inSet) {
-        switch(c) {
+        switch (c) {
             case '\r': return "\\r";
             case '\n': return "\\n";
             case '\t': return "\\t";
@@ -20,10 +20,10 @@ class RegexUtil {
             case ".":
                 return "\\${c}";
         }
-        if(inSet && c == "-") {
+        if (inSet && c == "-") {
             return "\\${c}";
         }
-        if(c < 0x20 || c >= 0x80) {
+        if (c < 0x20 || c >= 0x80) {
             def ss = Integer.toHexString(c);
             ss = "0000".substring(ss.length()) + ss
             return "\\x" + ss;
@@ -32,21 +32,21 @@ class RegexUtil {
     }
 
     private boolean handleRegexp(SExpression expr, StringBuilder sb) {
-        if(expr == null) {
+        if (expr == null) {
             throw new ParseException(expr.location, "null expression");
         }
 
-        if(expr instanceof SChoice) {
+        if (expr instanceof SChoice) {
             int size = expr.elements.size();
-            if(size == 0) {
+            if (size == 0) {
                 throw new ParseException(expr.location, "empty choice");
-            } else if(size == 1) {
+            } else if (size == 1) {
                 handleRegexp(expr.elements.first(), sb);
             } else {
                 sb.append("(");
                 boolean first = true;
-                for(SExpression e : expr.elements) {
-                    if(!first) {
+                for (SExpression e: expr.elements) {
+                    if (!first) {
                         sb.append("|");
                     } else {
                         first = false;
@@ -55,11 +55,11 @@ class RegexUtil {
                 }
                 sb.append(")");
             }
-        } else if(expr instanceof SSequence) {
-            for(SExpression e : expr.elements) {
+        } else if (expr instanceof SSequence) {
+            for (SExpression e: expr.elements) {
                 handleRegexp(e, sb);
             }
-        } else if(expr instanceof SCharacter) {
+        } else if (expr instanceof SCharacter) {
             // TODO sb.append(((SCharacter)expr).asRegexp(false))
 
         } else {
