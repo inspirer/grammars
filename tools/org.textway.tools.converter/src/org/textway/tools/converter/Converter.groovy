@@ -42,7 +42,7 @@ class Converter {
             }
 
             String content = new SWriter(l).write();
-            new File("${l.name}.spec_").write(content);
+            new File("${l.name}.0.spec").write(content);
         }
     }
 
