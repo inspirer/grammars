@@ -65,7 +65,7 @@ class LanguageBuilder {
                 if (!isOptionalTail)
                     throw new ConvertException(recursiveRule.location, "unsupported self-recursion");
 
-                SExpression quantifier = SUtil.createQuantifier(SUtil.createSequence(rulesyms, recursiveRule.location), 0, -1);
+                SExpression quantifier = SUtil.createQuantifier(SUtil.createSequence(rulesyms, recursiveRule.location), 1, -1);
                 term.value = quantifier;
 
             } else {
@@ -82,6 +82,9 @@ class LanguageBuilder {
                     }
                     if (isEmpty(rule1)) {
                         term.value = quantifier;
+                    } else if (!isOptionalTail && equals(rule1, ((SQuantifier) quantifier).inner)) {
+                        ((SQuantifier) quantifier).min = 1;
+                        term.value = quantifier;
                     } else {
                         term.value = SUtil.createSequence(leftRecursion ? [rule1, quantifier] : [quantifier, rule1], term.location);
                     }
@@ -93,11 +96,11 @@ class LanguageBuilder {
                     if (tt.size() < 1) {
                         term.value = quantifier;
                     } else {
-                        def choice = SUtil.createChoice(tt, tt.first().location);
+                        def element = tt.size() > 1 ? SUtil.createChoice(tt, tt.first().location) : tt.first();
                         if (isOptionalTail) {
-                            choice = SUtil.createQuantifier(choice, 0, 1);
+                            element = SUtil.createQuantifier(element, 0, 1);
                         }
-                        term.value = SUtil.createSequence(leftRecursion ? [choice, quantifier] : [quantifier, choice], term.location);
+                        term.value = SUtil.createSequence(leftRecursion ? [element, quantifier] : [quantifier, element], term.location);
                     }
                 }
             }
@@ -169,6 +172,47 @@ class LanguageBuilder {
         }
         return false;
     }
+
+    private boolean equals(SExpression e1, SExpression e2) {
+        e1 = unwrap(e1);
+        e2 = unwrap(e2);
+        if (e1 instanceof SReference && e2 instanceof SReference) {
+            return e1.isOptional == e2.isOptional && e1.resolved == e2.resolved;
+        } else if (e1 instanceof SSequence && e2 instanceof SSequence) {
+            List<SExpression> elist1 = e1.elements;
+            List<SExpression> elist2 = e2.elements;
+            if (elist1.size() != elist2.size()) {
+                return false;
+            }
+            for (int i: 0..<elist1.size()) {
+                if (!equals(elist1[i], elist2[i])) {
+                    return false;
+                }
+            }
+            return true;
+        } else if (e1 instanceof SCharacter && e2 instanceof SCharacter) {
+            return e1.c == e2.c;
+        } else if (e1 instanceof SAnyChar && e2 instanceof SAnyChar) {
+            return true;
+        } else if (e1 instanceof SQuantifier && e2 instanceof SQuantifier) {
+            return e1.min == e2.min && e1.max == e2.max && equals(e1.inner, e2.inner);
+        } else if (e1 instanceof SUnicodeCategory && e2 instanceof SUnicodeCategory) {
+            return e1.name.equals(e2.name);
+        }
+
+        return false;
+    }
+
+    private SExpression unwrap(SExpression e) {
+        if(e instanceof SSequence && e.elements != null && e.elements.size() == 1) {
+            return e.elements.first()
+        }
+        if(e instanceof SChoice && e.elements != null && e.elements.size() == 1) {
+            return e.elements.first()
+        }
+        return e;
+    }
+
 
     private boolean isEmpty(SExpression expr) {
         return expr instanceof SSequence && (((SSequence) expr).elements == null || ((SSequence) expr).elements.isEmpty());

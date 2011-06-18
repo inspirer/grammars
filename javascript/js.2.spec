@@ -62,7 +62,7 @@ SingleLineComment ::
 	/ / SingleLineCommentCharsopt
 
 SingleLineCommentChars ::
-	SingleLineCommentChar*
+	SingleLineCommentChar+
 
 SingleLineCommentChar ::
 	SourceCharacter but not LineTerminator
@@ -423,7 +423,7 @@ DecimalIntegerLiteral ::
 	NonZeroDigit DecimalDigitsopt
 
 DecimalDigits ::
-	DecimalDigit DecimalDigit*
+	DecimalDigit+
 
 DecimalDigit :: one of
 	0	1	2	3	4	5
@@ -459,10 +459,10 @@ StringLiteral :: (lexem)
 	' SingleStringCharactersopt '
 
 DoubleStringCharacters ::
-	DoubleStringCharacter*
+	DoubleStringCharacter+
 
 SingleStringCharacters ::
-	SingleStringCharacter*
+	SingleStringCharacter+
 
 DoubleStringCharacter ::
 	SourceCharacter but not " or \ or LineTerminator
