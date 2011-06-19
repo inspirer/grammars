@@ -30,8 +30,7 @@ class SWriter {
         if (s.isTerm) {
             isOneOf = !s.isEntry && s.value instanceof SChoice &&
                     ((SChoice) s.value).elements.size() > 6 &&
-                    (((SChoice) s.value).elements.any {it instanceof SCharacter} ||
-                            ((SChoice) s.value).elements.any {it instanceof SReference});
+                    (((SChoice) s.value).elements.every {it instanceof SReference || it instanceof SCharacter});
             if (isOneOf) {
                 sb.append(" :: one of\n")
             } else {

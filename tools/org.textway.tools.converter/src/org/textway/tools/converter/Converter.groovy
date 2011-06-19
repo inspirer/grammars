@@ -61,8 +61,14 @@ class Converter {
         save(lang, 2)
 
         builder.substituteLexemDefinitions();
+        builder.simplifyLexerRules();
 
         save(lang, 3)
+
+        builder.eliminateRecursionInTerms();
+        builder.simplifyLexerRules();
+
+        save(lang, 4)
     }
 
     static void save(SLanguage lang, int step) {

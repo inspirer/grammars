@@ -1,6 +1,8 @@
 package org.textway.tools.converter.builder
 
+import org.textway.tools.converter.ConvertException
 import org.textway.tools.converter.spec.*
+import org.textway.tools.converter.syntax.SRegexp
 
 /**
  *  evgeny, 6/19/11
@@ -64,17 +66,50 @@ class ExpressionUtil {
         return false;
     }
 
+    static SExpression clone(SExpression expr) {
+        if (expr == null) return null;
+
+        if (expr instanceof SAnyChar) {
+            return SUtil.createAnyChar(expr.location)
+        } else if (expr instanceof SCharacter) {
+            return SUtil.createChar(expr.c, expr.location)
+        } else if (expr instanceof SChoice) {
+            return SUtil.createChoice(expr.elements.collect { clone(it) }, expr.location)
+        } else if (expr instanceof SLookahead) {
+            return SUtil.createLookahead(expr.terms.collect { clone(expr) }, expr.inverted, expr.location)
+        } else if (expr instanceof SNoNewLine) {
+            return SUtil.createNoNewLine(expr.location)
+        } else if (expr instanceof SQuantifier) {
+            return SUtil.createQuantifier(clone(expr.inner), expr.min, expr.max);
+        } else if (expr instanceof SReference) {
+            def reference = SUtil.createReference(expr.internalText, expr.location)
+            reference.resolved = expr.resolved;
+            reference.isOptional = expr.isOptional;
+            return reference;
+        } else if (expr instanceof SSequence) {
+            return SUtil.createSequence(expr.elements.collect {clone(it)}, expr.location);
+        } else if (expr instanceof SSetDiff) {
+            return SUtil.createDiff(clone(expr.left), clone(expr.right), expr.location);
+        } else if (expr instanceof SUnicodeCategory) {
+            return SUtil.createUnicodeCategory(expr.name, expr.location);
+        } else if(expr instanceof SRegexp) {
+            return RegexUtil.create(expr.text, expr.location);
+        } else {
+            throw new ConvertException(expr.location, "Cannot clone: ${expr}");
+        }
+    }
+
     static SExpression replaceReference(SExpression expr, SSymbol sym, Closure<SExpression> cl) {
         if (expr instanceof SReference) {
-            if(((SReference)expr).resolved == sym) {
+            if (((SReference) expr).resolved == sym) {
                 return cl.call(expr);
             }
         } else if (expr instanceof SSequence) {
-            for(int i : 0..<expr.elements.size()) {
+            for (int i: 0..<expr.elements.size()) {
                 expr.elements[i] = replaceReference(expr.elements[i], sym, cl)
             }
         } else if (expr instanceof SChoice) {
-            for(int i : 0..<expr.elements.size()) {
+            for (int i: 0..<expr.elements.size()) {
                 expr.elements[i] = replaceReference(expr.elements[i], sym, cl)
             }
         } else if (expr instanceof SSetDiff) {
@@ -117,13 +152,48 @@ class ExpressionUtil {
     }
 
     static SExpression unwrap(SExpression e) {
-        if(e instanceof SSequence && e.elements != null && e.elements.size() == 1) {
+        if (e instanceof SSequence && e.elements != null && e.elements.size() == 1) {
             return e.elements.first()
         }
-        if(e instanceof SChoice && e.elements != null && e.elements.size() == 1) {
+        if (e instanceof SChoice && e.elements != null && e.elements.size() == 1) {
             return e.elements.first()
         }
         return e;
+    }
+
+    static List<SExpression> unwrapSequence(SExpression e) {
+        e = unwrap(e);
+        if(e instanceof SSequence) {
+            return (List) ((SSequence)e).elements.collect { unwrapSequence(it) }.flatten()
+        }
+        return [e];
+    }
+
+    static SExpression simplify(SExpression expr) {
+        if (expr instanceof SSequence) {
+            for (int i: 0..<expr.elements.size()) {
+                expr.elements[i] = simplify(expr.elements[i])
+            }
+            if(expr.elements.any {it instanceof SSequence}) {
+                expr.elements = expr.elements.collect { it instanceof SSequence ? it.elements : [it] }.flatten().collect {simplify((SExpression)it)};
+            }
+        } else if (expr instanceof SChoice) {
+            for (int i: 0..<expr.elements.size()) {
+                expr.elements[i] = simplify(expr.elements[i])
+            }
+            if(expr.elements.any {it instanceof SChoice}) {
+                expr.elements = expr.elements.collect { it instanceof SChoice ? it.elements : [it] }.flatten().collect {simplify((SExpression)it)};
+            }
+        } else if (expr instanceof SSetDiff) {
+            expr.left = simplify(expr.left);
+            expr.right = simplify(expr.right);
+        } else if (expr instanceof SQuantifier) {
+            if(expr.min == 1 && expr.max == 1) {
+                return expr.inner;
+            }
+            expr.inner = simplify(expr.inner);
+        }
+        return expr;
     }
 
 

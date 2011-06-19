@@ -68,8 +68,41 @@ class LanguageBuilder {
     }
 
     void eliminateRecursionInTerms() {
-        for (SSymbol term: language.all.findAll {it.isTerm}) {
+        for (SSymbol term: language.all.findAll {it.isTerm && ExpressionUtil.refers(it.value, it)}) {
+            prepareTermForRecursionElimination(term);
             eliminateSelfRecursionInTerm(term);
+        }
+    }
+
+    void simplifyLexerRules() {
+        for (SSymbol term: language.all.findAll {it.isTerm}) {
+            term.value = ExpressionUtil.simplify(term.value);
+        }
+    }
+
+    void prepareTermForRecursionElimination(SSymbol term) {
+        if(!(term.value instanceof SChoice)) term.value = SUtil.createChoice([term.value], term.location);
+        def rules = ((SChoice)term.value).elements;
+
+        boolean tryAgain = true;
+        while(tryAgain) {
+            tryAgain = false;
+            def affected = rules.findAll { ExpressionUtil.refers(it, term)  }
+            for(def rule : affected) {
+                if(!(rule instanceof SSequence)) continue;
+                List<SExpression> ruleItems = ((SSequence)rule).elements;
+                List<SExpression> affectedItems = ruleItems.findAll { ExpressionUtil.refers(it, term) }
+                if(affectedItems.size() == 1 && affectedItems.first() instanceof SQuantifier) {
+                    SQuantifier q = (SQuantifier) affectedItems.first();
+                    if(q.min == 0 && q.max == 1) {
+                        def newItems = (List<SExpression>) ruleItems.collect { it != q ? ExpressionUtil.clone(it) : ExpressionUtil.unwrapSequence(q.inner) }.flatten();
+                        def rule2 = SUtil.createSequence(newItems, rule.location);
+                        ruleItems.remove(q);
+                        rules.add(rules.indexOf(rule), rule2);
+                        tryAgain = true;
+                    }
+                }
+            }
         }
     }
 

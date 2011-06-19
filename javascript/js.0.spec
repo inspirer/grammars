@@ -17,8 +17,13 @@ InputElementRegExp ::
 	Token
 	RegularExpressionLiteral
 
-WhiteSpace :: one of
-	<TAB>	<VT>	<FF>	<SP>	<NBSP>	<BOM>
+WhiteSpace ::
+	<TAB>
+	<VT>
+	<FF>
+	<SP>
+	<NBSP>
+	<BOM>
 	<Zs>
 
 LineTerminator ::
