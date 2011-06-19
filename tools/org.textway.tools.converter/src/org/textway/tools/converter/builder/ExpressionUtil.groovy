@@ -1,8 +1,8 @@
 package org.textway.tools.converter.builder
 
 import org.textway.tools.converter.ConvertException
-import org.textway.tools.converter.spec.*
 import org.textway.tools.converter.syntax.SRegexp
+import org.textway.tools.converter.spec.*
 
 /**
  *  evgeny, 6/19/11
@@ -92,7 +92,7 @@ class ExpressionUtil {
             return SUtil.createDiff(clone(expr.left), clone(expr.right), expr.location);
         } else if (expr instanceof SUnicodeCategory) {
             return SUtil.createUnicodeCategory(expr.name, expr.location);
-        } else if(expr instanceof SRegexp) {
+        } else if (expr instanceof SRegexp) {
             return RegexUtil.create(expr.text, expr.location);
         } else {
             throw new ConvertException(expr.location, "Cannot clone: ${expr}");
@@ -163,10 +163,40 @@ class ExpressionUtil {
 
     static List<SExpression> unwrapSequence(SExpression e) {
         e = unwrap(e);
-        if(e instanceof SSequence) {
-            return (List) ((SSequence)e).elements.collect { unwrapSequence(it) }.flatten()
+        if (e instanceof SSequence) {
+            return (List) ((SSequence) e).elements.collect { unwrapSequence(it) }.flatten()
         }
         return [e];
+    }
+
+    private static void combineQuantifiers(SSequence expr) {
+        boolean tryAgain = true;
+        while (tryAgain) {
+            tryAgain = false;
+            int indexToDelete = -1;
+            for (int i: 1..<expr.elements.size()) {
+                SExpression prev = expr.elements[i - 1];
+                SExpression curr = expr.elements[i];
+                if (curr instanceof SQuantifier && equals(((SQuantifier) curr).inner, prev)) {
+                    indexToDelete = i - 1;
+                    curr.min++;
+                    if (curr.max != -1) {
+                        curr.max++;
+                    }
+                    break;
+                } else if (prev instanceof SQuantifier && equals(((SQuantifier) prev).inner, curr)) {
+                    indexToDelete = i;
+                    prev.min++;
+                    if (prev.max != -1) {
+                        prev.max++;
+                    }
+                }
+            }
+            if (indexToDelete >= 0) {
+                tryAgain = true;
+                expr.elements.remove(indexToDelete);
+            }
+        }
     }
 
     static SExpression simplify(SExpression expr) {
@@ -174,21 +204,24 @@ class ExpressionUtil {
             for (int i: 0..<expr.elements.size()) {
                 expr.elements[i] = simplify(expr.elements[i])
             }
-            if(expr.elements.any {it instanceof SSequence}) {
-                expr.elements = expr.elements.collect { it instanceof SSequence ? it.elements : [it] }.flatten().collect {simplify((SExpression)it)};
+            if (expr.elements.any {it instanceof SSequence}) {
+                expr.elements = expr.elements.collect { it instanceof SSequence ? it.elements : [it] }.flatten().collect {simplify((SExpression) it)};
             }
+            if (expr.elements.size() == 1) return expr.elements.first();
+            combineQuantifiers(expr)
         } else if (expr instanceof SChoice) {
             for (int i: 0..<expr.elements.size()) {
                 expr.elements[i] = simplify(expr.elements[i])
             }
-            if(expr.elements.any {it instanceof SChoice}) {
-                expr.elements = expr.elements.collect { it instanceof SChoice ? it.elements : [it] }.flatten().collect {simplify((SExpression)it)};
+            if (expr.elements.any {it instanceof SChoice}) {
+                expr.elements = expr.elements.collect { it instanceof SChoice ? it.elements : [it] }.flatten().collect {simplify((SExpression) it)};
             }
+            if (expr.elements.size() == 1) return expr.elements.first();
         } else if (expr instanceof SSetDiff) {
             expr.left = simplify(expr.left);
             expr.right = simplify(expr.right);
         } else if (expr instanceof SQuantifier) {
-            if(expr.min == 1 && expr.max == 1) {
+            if (expr.min == 1 && expr.max == 1) {
                 return expr.inner;
             }
             expr.inner = simplify(expr.inner);

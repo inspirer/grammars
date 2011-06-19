@@ -20,10 +20,10 @@ LineTerminator :: (lexem)
 
 Comment :: (lexem)
 	/ * MultiLineCommentCharsopt * /
-	/ / ((SourceCharacter but not LineTerminator))*
+	/ / (SourceCharacter but not LineTerminator)*
 
 MultiLineCommentChars ::
-	(((SourceCharacter but not *))* * ** (SourceCharacter but not (/ or *)))* (((SourceCharacter but not *))* * ** or ((SourceCharacter but not *))* * or ((SourceCharacter but not *))*)?
+	((SourceCharacter but not *)* *+ (SourceCharacter but not (/ or *)))* ((SourceCharacter but not *)* *+ or (SourceCharacter but not *)* * or (SourceCharacter but not *)*)?
 
 Identifier :: (lexem)
 	IdentifierName but not (break or do or instanceof or typeof or case or else or new or var or catch or finally or return or void or continue or for or switch or while or debugger or function or this or with or default or if or throw or delete or in or try or get or set or class or enum or extends or super or const or export or import or NullLiteral or BooleanLiteral)
@@ -371,7 +371,7 @@ UnicodeEscapeSequence ::
 	u HexDigit HexDigit HexDigit HexDigit
 
 RegularExpressionLiteral :: (lexem)
-	/ (((RegularExpressionNonTerminator but not (* or \ or / or [)) or RegularExpressionBackslashSequence or RegularExpressionClass) ((RegularExpressionNonTerminator but not (\ or / or [)) or RegularExpressionBackslashSequence or RegularExpressionClass)*) / IdentifierPart*
+	/ ((RegularExpressionNonTerminator but not (* or \ or / or [)) or RegularExpressionBackslashSequence or RegularExpressionClass) ((RegularExpressionNonTerminator but not (\ or / or [)) or RegularExpressionBackslashSequence or RegularExpressionClass)* / IdentifierPart*
 
 RegularExpressionBackslashSequence ::
 	\ RegularExpressionNonTerminator
