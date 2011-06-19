@@ -79,6 +79,7 @@ class Converter {
         builder.simplifyLexerRules();
 
         save(lang, 6);
+        save(lang, 7);
     }
 
     static void save(SLanguage lang, int step) {

@@ -1,26 +1,17 @@
 # js
 
 WhiteSpace :: (lexem)
-	/\t/
-	/\u000b/
-	/\u000c/
-	/ /
-	/\u00a0/
-	/\ufeff/
-	/\p{Zs}/
+	/[\t\u000b\u000c \u00a0\ufeff\p{Zs}]/
 
 LineTerminator :: (lexem)
-	/\n/
-	/\r/
-	/\u2028/
-	/\u2029/
+	/[\n\r\u2028\u2029]/
 
 Comment :: (lexem)
 	/\/\*(([^\*]*\*+[^\*\/])*([^\*]*\**)?)?\*\//
 	/\/\/[^\n\r\u2028\u2029]*/
 
 Identifier :: (lexem)
-	/<unknown org.textway.tools.converter.spec.SSetDiff@520e7d53 >/
+	/<unknown org.textway.tools.converter.spec.SSetDiff@2c61ec49 >/
 
 IdentifierName :: (lexem)
 	/(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|$|_|\\(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))((\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|$|_|\\(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200c|\u200d)*/

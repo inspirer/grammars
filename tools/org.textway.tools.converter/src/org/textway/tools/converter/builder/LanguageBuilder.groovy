@@ -246,7 +246,7 @@ class LanguageBuilder {
     void convertLexems() {
         for (SSymbol lexem: language.all.findAll {it.isTerm && it.isEntry}) {
             def builder = new StringBuilder()
-            if (lexem.value instanceof SChoice) {
+            if (lexem.value instanceof SChoice && !(((SChoice) lexem.value).elements.every { it instanceof SCharacter || it instanceof SUnicodeCategory})) {
                 def list = ((SChoice) lexem.value).elements;
                 for (int i: 0..<list.size()) {
                     builder.setLength(0);

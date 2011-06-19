@@ -1,26 +1,88 @@
 package org.textway.tools.converter.writer
 
+import org.textway.tools.converter.builder.ExpressionUtil
 import org.textway.tools.converter.builder.RegexUtil
 import org.textway.tools.converter.syntax.SRegexp
 import org.textway.tools.converter.spec.*
-import org.textway.tools.converter.builder.ExpressionUtil
 
 class SWriter {
 
     SLanguage language;
     StringBuilder sb;
+    int level
+    def names = [:];
 
     SWriter(SLanguage language, int level) {
         this.language = language
+        this.level = level
         sb = new StringBuilder();
     }
 
     String write() {
+
         sb.append("# ${language.name}\n\n");
-        for (s in language.all) {
-            write(s);
+        if (level >= 7) {
+            for(SSymbol s : language.all.findAll { it.isEntry }) {
+                names[s.name] = isIdentifier(s.name) ? s.name : '\'' + s.name + '\'';
+            }
+
+            for (s in language.all.findAll {it.isTerm && it.isEntry}) {
+                writeLexem(s);
+            }
+
+            sb.append("\n# parser\n\n");
+
+            for (s in language.all.findAll {!it.isTerm && it.isEntry}) {
+                writeNonTerm(s);
+            }
+
+        } else {
+            language.all.each {names[it.name] = it.name;}
+            for (s in language.all) {
+                write(s);
+            }
         }
+
         sb.toString();
+    }
+
+    void writeLexem(SSymbol s) {
+        if (s.value instanceof SChoice) {
+            for (def t: ((SChoice) s.value).elements) {
+                sb.append(names[s.name]);
+                sb.append(": ");
+                sb.append(((SRegexp) t).text);
+                sb.append('\n');
+            }
+            sb.append('\n');
+        } else {
+            sb.append(names[s.name]);
+            sb.append(": ");
+            sb.append(((SRegexp) s.value).text);
+            sb.append('\n');
+        }
+    }
+
+    void writeNonTerm(SSymbol s) {
+        sb.append(names[s.name]);
+        sb.append(" ::=\n");
+        if (s.value instanceof SChoice) {
+            def elements = ((SChoice) s.value).elements;
+            boolean first = true;
+            for (e in elements) {
+                sb.append('\t');
+                sb.append(first ? '  ' : '| ');
+                sb.append(asString(e, false))
+                sb.append("\n");
+                first = false;
+            }
+            sb.append(";\n")
+        } else {
+            sb.append('\t');
+            sb.append(asString(s.value, false))
+            sb.append(" ;\n");
+        }
+        sb.append('\n');
     }
 
     void write(SSymbol s) {
@@ -94,7 +156,7 @@ class SWriter {
         } else if (e instanceof SNoNewLine) {
             return "[no LineTerminator here]";
         } else if (e instanceof SReference) {
-            return e.resolved.name + (e.isOptional ? "opt" : "");
+            return names[e.resolved.name] + (e.isOptional ? "opt" : "");
         } else if (e instanceof SRegexp) {
             return ((SRegexp) e).text
         } else if (e instanceof SQuantifier) {
@@ -120,4 +182,7 @@ class SWriter {
         charmap.put((Character) 0xFEFF, 'BOM');
     }
 
+    boolean isIdentifier(String s) {
+        return s.matches(~/[a-zA-Z_][a-zA-Z_0-9]*/);
+    }
 }
