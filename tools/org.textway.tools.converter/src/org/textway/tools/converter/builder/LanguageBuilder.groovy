@@ -96,6 +96,7 @@ class LanguageBuilder {
                 return it;
             };
         }
+        removeUnusedTermDefinitions();
     }
 
     void eliminateRecursionInTerms() {

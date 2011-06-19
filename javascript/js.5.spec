@@ -1,8 +1,5 @@
 # js
 
-SourceCharacter ::
-	[anychar]
-
 WhiteSpace :: (lexem)
 	<TAB>
 	<VT>
