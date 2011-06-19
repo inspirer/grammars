@@ -18,90 +18,32 @@ LineTerminator :: (lexem)
 	<LS>
 	<PS>
 
-LineTerminatorSequence ::
-	<LF>
-	<CR> [lookahead != <LF>]
-	<LS>
-	<PS>
-	<CR> <LF>
-
 Comment :: (lexem)
-	MultiLineComment
-	SingleLineComment
-
-MultiLineComment ::
 	/ * MultiLineCommentCharsopt * /
+	/ / ((SourceCharacter but not LineTerminator))*
 
 MultiLineCommentChars ::
-	MultiLineNotAsteriskChar MultiLineCommentCharsopt
-	* PostAsteriskCommentCharsopt
-
-PostAsteriskCommentChars ::
-	MultiLineNotForwardSlashOrAsteriskChar MultiLineCommentCharsopt
-	* PostAsteriskCommentCharsopt
-
-MultiLineNotAsteriskChar ::
-	SourceCharacter but not *
-
-MultiLineNotForwardSlashOrAsteriskChar ::
-	SourceCharacter but not (/ or *)
-
-SingleLineComment ::
-	/ / SingleLineCommentCharsopt
-
-SingleLineCommentChars ::
-	SingleLineCommentChar SingleLineCommentCharsopt
-
-SingleLineCommentChar ::
-	SourceCharacter but not LineTerminator
+	((SourceCharacter but not *))* (* (** ((SourceCharacter but not (/ or *)) MultiLineCommentCharsopt)?)?)?
 
 Identifier :: (lexem)
-	IdentifierName but not ReservedWord
+	IdentifierName but not ((break or do or instanceof or typeof or case or else or new or var or catch or finally or return or void or continue or for or switch or while or debugger or function or this or with or default or if or throw or delete or in or try or get or set) or (class or enum or extends or super or const or export or import) or NullLiteral or BooleanLiteral)
 
 IdentifierName :: (lexem)
-	IdentifierStart
-	IdentifierName IdentifierPart
+	IdentifierStart IdentifierPart*
 
 IdentifierStart ::
-	UnicodeLetter
+	<Lu> or <Ll> or <Lt> or <Lm> or <Lo> or <Nl>
 	$
 	_
 	\ UnicodeEscapeSequence
 
 IdentifierPart ::
 	IdentifierStart
-	UnicodeCombiningMark
-	UnicodeDigit
-	UnicodeConnectorPunctuation
+	<Mn> or <Mc>
+	<Nd>
+	<Pc>
 	<ZWNJ>
 	<ZWJ>
-
-UnicodeLetter ::
-	<Lu> or <Ll> or <Lt> or <Lm> or <Lo> or <Nl>
-
-UnicodeCombiningMark ::
-	<Mn> or <Mc>
-
-UnicodeDigit ::
-	<Nd>
-
-UnicodeConnectorPunctuation ::
-	<Pc>
-
-ReservedWord ::
-	Keyword
-	FutureReservedWord
-	NullLiteral
-	BooleanLiteral
-
-Keyword :: one of
-	break	do	instanceof	typeof
-	case	else	new	var
-	catch	finally	return	void
-	continue	for	switch	while
-	debugger	function	this	with
-	default	if	throw	delete
-	in	try	get	set
 
 break :: (lexem)
 	b r e a k
@@ -186,10 +128,6 @@ get :: (lexem)
 
 set :: (lexem)
 	s e t
-
-FutureReservedWord :: one of
-	class	enum	extends	super
-	const	export	import
 
 class :: (lexem)
 	c l a s s
@@ -380,46 +318,22 @@ false :: (lexem)
 	f a l s e
 
 NumericLiteral :: (lexem)
-	DecimalLiteral
-	HexIntegerLiteral
-
-DecimalLiteral ::
-	DecimalIntegerLiteral . DecimalDigitsopt ExponentPartopt
-	. DecimalDigits ExponentPartopt
-	DecimalIntegerLiteral ExponentPartopt
+	DecimalIntegerLiteral . DecimalDigitsopt ExponentPartopt or . DecimalDigits ExponentPartopt or DecimalIntegerLiteral ExponentPartopt
+	(0 x HexDigit or 0 X HexDigit) HexDigit*
 
 DecimalIntegerLiteral ::
 	0
-	NonZeroDigit DecimalDigitsopt
+	(1 or 2 or 3 or 4 or 5 or 6 or 7 or 8 or 9) DecimalDigitsopt
 
 DecimalDigits ::
-	DecimalDigit
-	DecimalDigits DecimalDigit
+	DecimalDigit+
 
 DecimalDigit :: one of
 	0	1	2	3	4	5
 	6	7	8	9
 
-NonZeroDigit :: one of
-	1	2	3	4	5	6
-	7	8	9
-
 ExponentPart ::
-	ExponentIndicator SignedInteger
-
-ExponentIndicator ::
-	e
-	E
-
-SignedInteger ::
-	DecimalDigits
-	+ DecimalDigits
-	- DecimalDigits
-
-HexIntegerLiteral ::
-	0 x HexDigit
-	0 X HexDigit
-	HexIntegerLiteral HexDigit
+	(e or E) (DecimalDigits or + DecimalDigits or - DecimalDigits)
 
 HexDigit :: one of
 	0	1	2	3	4	5
@@ -428,76 +342,27 @@ HexDigit :: one of
 	C	D	E	F
 
 StringLiteral :: (lexem)
-	" DoubleStringCharactersopt "
-	' SingleStringCharactersopt '
-
-DoubleStringCharacters ::
-	DoubleStringCharacter DoubleStringCharactersopt
-
-SingleStringCharacters ::
-	SingleStringCharacter SingleStringCharactersopt
-
-DoubleStringCharacter ::
-	SourceCharacter but not (" or \ or LineTerminator)
-	\ EscapeSequence
-	LineContinuation
-
-SingleStringCharacter ::
-	SourceCharacter but not (' or \ or LineTerminator)
-	\ EscapeSequence
-	LineContinuation
+	" ((SourceCharacter but not (" or \ or LineTerminator)) or \ EscapeSequence or LineContinuation)* "
+	' ((SourceCharacter but not (' or \ or LineTerminator)) or \ EscapeSequence or LineContinuation)* '
 
 LineContinuation ::
-	\ LineTerminatorSequence
+	\ (<LF> or <CR> [lookahead != <LF>] or <LS> or <PS> or <CR> <LF>)
 
 EscapeSequence ::
-	CharacterEscapeSequence
+	SingleEscapeCharacter or (SourceCharacter but not ((SingleEscapeCharacter or DecimalDigit or x or u) or LineTerminator))
 	0 [lookahead != DecimalDigit]
-	HexEscapeSequence
+	x HexDigit HexDigit
 	UnicodeEscapeSequence
-
-CharacterEscapeSequence ::
-	SingleEscapeCharacter
-	NonEscapeCharacter
 
 SingleEscapeCharacter :: one of
 	'	"	\	b	f	n
 	r	t	v
 
-NonEscapeCharacter ::
-	SourceCharacter but not (EscapeCharacter or LineTerminator)
-
-EscapeCharacter ::
-	SingleEscapeCharacter
-	DecimalDigit
-	x
-	u
-
-HexEscapeSequence ::
-	x HexDigit HexDigit
-
 UnicodeEscapeSequence ::
 	u HexDigit HexDigit HexDigit HexDigit
 
 RegularExpressionLiteral :: (lexem)
-	/ RegularExpressionBody / RegularExpressionFlags
-
-RegularExpressionBody ::
-	RegularExpressionFirstChar RegularExpressionChars
-
-RegularExpressionChars ::
-	[empty]
-	RegularExpressionChars RegularExpressionChar
-
-RegularExpressionFirstChar ::
-	RegularExpressionNonTerminator but not (* or \ or / or [)
-	RegularExpressionBackslashSequence
-	RegularExpressionClass
-
-RegularExpressionChar ::
-	RegularExpressionNonTerminator but not (\ or / or [)
-	RegularExpressionBackslashSequence
-	RegularExpressionClass
+	/ (((RegularExpressionNonTerminator but not (* or \ or / or [)) or RegularExpressionBackslashSequence or RegularExpressionClass) ((RegularExpressionNonTerminator but not (\ or / or [)) or RegularExpressionBackslashSequence or RegularExpressionClass)*) / IdentifierPart*
 
 RegularExpressionBackslashSequence ::
 	\ RegularExpressionNonTerminator
@@ -506,19 +371,7 @@ RegularExpressionNonTerminator ::
 	SourceCharacter but not LineTerminator
 
 RegularExpressionClass ::
-	[ RegularExpressionClassChars ]
-
-RegularExpressionClassChars ::
-	[empty]
-	RegularExpressionClassChars RegularExpressionClassChar
-
-RegularExpressionClassChar ::
-	RegularExpressionNonTerminator but not (] or \)
-	RegularExpressionBackslashSequence
-
-RegularExpressionFlags ::
-	[empty]
-	RegularExpressionFlags IdentifierPart
+	[ ((RegularExpressionNonTerminator but not (] or \)) or RegularExpressionBackslashSequence)* ]
 
 PrimaryExpression :
 	this

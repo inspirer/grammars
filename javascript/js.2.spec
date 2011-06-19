@@ -42,7 +42,7 @@ MultiLineNotAsteriskChar ::
 	SourceCharacter but not *
 
 MultiLineNotForwardSlashOrAsteriskChar ::
-	SourceCharacter but not / or *
+	SourceCharacter but not (/ or *)
 
 SingleLineComment ::
 	/ / SingleLineCommentCharsopt
@@ -432,12 +432,12 @@ SingleStringCharacters ::
 	SingleStringCharacter+
 
 DoubleStringCharacter ::
-	SourceCharacter but not " or \ or LineTerminator
+	SourceCharacter but not (" or \ or LineTerminator)
 	\ EscapeSequence
 	LineContinuation
 
 SingleStringCharacter ::
-	SourceCharacter but not ' or \ or LineTerminator
+	SourceCharacter but not (' or \ or LineTerminator)
 	\ EscapeSequence
 	LineContinuation
 
@@ -459,7 +459,7 @@ SingleEscapeCharacter :: one of
 	r	t	v
 
 NonEscapeCharacter ::
-	SourceCharacter but not EscapeCharacter or LineTerminator
+	SourceCharacter but not (EscapeCharacter or LineTerminator)
 
 EscapeCharacter ::
 	SingleEscapeCharacter
@@ -483,12 +483,12 @@ RegularExpressionChars ::
 	RegularExpressionChar*
 
 RegularExpressionFirstChar ::
-	RegularExpressionNonTerminator but not * or \ or / or [
+	RegularExpressionNonTerminator but not (* or \ or / or [)
 	RegularExpressionBackslashSequence
 	RegularExpressionClass
 
 RegularExpressionChar ::
-	RegularExpressionNonTerminator but not \ or / or [
+	RegularExpressionNonTerminator but not (\ or / or [)
 	RegularExpressionBackslashSequence
 	RegularExpressionClass
 
@@ -505,7 +505,7 @@ RegularExpressionClassChars ::
 	RegularExpressionClassChar*
 
 RegularExpressionClassChar ::
-	RegularExpressionNonTerminator but not ] or \
+	RegularExpressionNonTerminator but not (] or \)
 	RegularExpressionBackslashSequence
 
 RegularExpressionFlags ::

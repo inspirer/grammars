@@ -64,6 +64,28 @@ class ExpressionUtil {
         return false;
     }
 
+    static SExpression replaceReference(SExpression expr, SSymbol sym, Closure<SExpression> cl) {
+        if (expr instanceof SReference) {
+            if(((SReference)expr).resolved == sym) {
+                return cl.call(expr);
+            }
+        } else if (expr instanceof SSequence) {
+            for(int i : 0..<expr.elements.size()) {
+                expr.elements[i] = replaceReference(expr.elements[i], sym, cl)
+            }
+        } else if (expr instanceof SChoice) {
+            for(int i : 0..<expr.elements.size()) {
+                expr.elements[i] = replaceReference(expr.elements[i], sym, cl)
+            }
+        } else if (expr instanceof SSetDiff) {
+            expr.left = replaceReference(expr.left, sym, cl);
+            expr.right = replaceReference(expr.right, sym, cl);
+        } else if (expr instanceof SQuantifier) {
+            expr.inner = replaceReference(expr.inner, sym, cl);
+        }
+        return expr;
+    }
+
     static boolean equals(SExpression e1, SExpression e2) {
         e1 = unwrap(e1);
         e2 = unwrap(e2);

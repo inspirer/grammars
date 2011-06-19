@@ -71,11 +71,11 @@ class LanguageBuilder {
         for (SSymbol term: language.all.findAll {it.isTerm}) {
             eliminateSelfRecursionInTerm(term);
         }
-        substituteLexemDefinitions();
     }
 
-    private void substituteLexemDefinitions() {
+    void substituteLexemDefinitions() {
         Map<SSymbol, Integer> sym2refsnumber = [:];
+        Map<SSymbol, SSymbol> toinline = [:]
         for (SSymbol term: language.all.findAll {it.isTerm}) {
             def refs = ExpressionUtil.getReferences(term.value);
             for (SReference ref: refs) {
@@ -85,10 +85,22 @@ class LanguageBuilder {
                 } else {
                     sym2refsnumber[ref.resolved]++;
                 }
+                toinline[ref.resolved] = term;
             }
         }
-        for (SSymbol s: sym2refsnumber.keySet().findAll {sym2refsnumber[it] == 1}) {
-            println(s.name)
+        for (SSymbol s: toinline.keySet().findAll {sym2refsnumber[it] == 1}) {
+            language.all.remove(s);
+            SSymbol term = toinline[s];
+            term.value = ExpressionUtil.replaceReference(term.value, s, {
+                if(((SReference)it).isOptional) {
+                    if(s.value instanceof SQuantifier && ((SQuantifier)s.value).min == 1) {
+                        ((SQuantifier)s.value).min = 0;
+                    } else {
+                        return SUtil.createQuantifier(s.value, 0, 1);
+                    }
+                }
+                return s.value;
+            })
         }
     }
 

@@ -3,6 +3,7 @@ package org.textway.tools.converter.writer
 import org.textway.tools.converter.builder.RegexUtil
 import org.textway.tools.converter.syntax.SRegexp
 import org.textway.tools.converter.spec.*
+import org.textway.tools.converter.builder.ExpressionUtil
 
 class SWriter {
 
@@ -69,6 +70,7 @@ class SWriter {
     }
 
     String asString(SExpression e, boolean needParens) {
+        e = ExpressionUtil.unwrap(e);
         if (e instanceof SSequence) {
             if (e.elements == null || e.elements.isEmpty()) {
                 return "[empty]";
@@ -76,7 +78,7 @@ class SWriter {
             if (e.elements.size() < 2) needParens = false;
             return (needParens ? "(" : "") + e.elements.collect { asString(it, true) }.join(" ") + (needParens ? ")" : "");
         } else if (e instanceof SChoice) {
-            return (needParens ? "(" : "") + e.elements.collect { asString(it, false) }.join(" or ") + (needParens ? ")" : "");
+            return (needParens ? "(" : "") + e.elements.collect { asString(it, !(it instanceof SSequence)) }.join(" or ") + (needParens ? ")" : "");
         } else if (e instanceof SCharacter) {
             return charmap.containsKey(e.c) ? "<" + charmap[e.c] + ">" : e.c;
         } else if (e instanceof SAnyChar) {
@@ -86,7 +88,7 @@ class SWriter {
         } else if (e instanceof SUnicodeCategory) {
             return "<" + e.name + ">";
         } else if (e instanceof SSetDiff) {
-            return (needParens ? "[" : "") + asString(e.left, false) + " but not " + asString(e.right, false) + (needParens ? "]" : "");
+            return (needParens ? "(" : "") + asString(e.left, false) + " but not " + asString(e.right, true) + (needParens ? ")" : "");
         } else if (e instanceof SNoNewLine) {
             return "[no LineTerminator here]";
         } else if (e instanceof SReference) {

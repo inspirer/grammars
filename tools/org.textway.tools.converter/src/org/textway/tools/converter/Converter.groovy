@@ -59,6 +59,10 @@ class Converter {
         builder.eliminateRecursionInTerms()
 
         save(lang, 2)
+
+        builder.substituteLexemDefinitions();
+
+        save(lang, 3)
     }
 
     static void save(SLanguage lang, int step) {
