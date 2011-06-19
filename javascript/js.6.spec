@@ -1,301 +1,278 @@
 # js
 
 WhiteSpace :: (lexem)
-	<TAB>
-	<VT>
-	<FF>
-	<SP>
-	<NBSP>
-	<BOM>
-	<Zs>
+	/\t/
+	/\u000b/
+	/\u000c/
+	/ /
+	/\u00a0/
+	/\ufeff/
+	/\p{Zs}/
 
 LineTerminator :: (lexem)
-	<LF>
-	<CR>
-	<LS>
-	<PS>
+	/\n/
+	/\r/
+	/\u2028/
+	/\u2029/
 
 Comment :: (lexem)
-	/ * MultiLineCommentCharsopt * /
-	/ / /[^\n\r\u2028\u2029]/*
-
-MultiLineCommentChars ::
-	(/[^\*]/* *+ /[^\*\/]/)* (/[^\*]/* **)?
+	/\/\*(([^\*]*\*+[^\*\/])*([^\*]*\**)?)?\*\//
+	/\/\/[^\n\r\u2028\u2029]*/
 
 Identifier :: (lexem)
-	IdentifierName but not (break or do or instanceof or typeof or case or else or new or var or catch or finally or return or void or continue or for or switch or while or debugger or function or this or with or default or if or throw or delete or in or try or get or set or class or enum or extends or super or const or export or import or NullLiteral or BooleanLiteral)
+	/<unknown org.textway.tools.converter.spec.SSetDiff@63db6942 >/
 
 IdentifierName :: (lexem)
-	IdentifierStart IdentifierPart*
-
-IdentifierStart ::
-	<Lu>
-	<Ll>
-	<Lt>
-	<Lm>
-	<Lo>
-	<Nl>
-	$
-	_
-	\ UnicodeEscapeSequence
-
-IdentifierPart ::
-	IdentifierStart
-	<Mn>
-	<Mc>
-	<Nd>
-	<Pc>
-	<ZWNJ>
-	<ZWJ>
+	/(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|$|_|\\(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))((\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|$|_|\\(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200c|\u200d)*/
 
 break :: (lexem)
-	b r e a k
+	/break/
 
 do :: (lexem)
-	d o
+	/do/
 
 instanceof :: (lexem)
-	i n s t a n c e o f
+	/instanceof/
 
 typeof :: (lexem)
-	t y p e o f
+	/typeof/
 
 case :: (lexem)
-	c a s e
+	/case/
 
 else :: (lexem)
-	e l s e
+	/else/
 
 new :: (lexem)
-	n e w
+	/new/
 
 var :: (lexem)
-	v a r
+	/var/
 
 catch :: (lexem)
-	c a t c h
+	/catch/
 
 finally :: (lexem)
-	f i n a l l y
+	/finally/
 
 return :: (lexem)
-	r e t u r n
+	/return/
 
 void :: (lexem)
-	v o i d
+	/void/
 
 continue :: (lexem)
-	c o n t i n u e
+	/continue/
 
 for :: (lexem)
-	f o r
+	/for/
 
 switch :: (lexem)
-	s w i t c h
+	/switch/
 
 while :: (lexem)
-	w h i l e
+	/while/
 
 debugger :: (lexem)
-	d e b u g g e r
+	/debugger/
 
 function :: (lexem)
-	f u n c t i o n
+	/function/
 
 this :: (lexem)
-	t h i s
+	/this/
 
 with :: (lexem)
-	w i t h
+	/with/
 
 default :: (lexem)
-	d e f a u l t
+	/default/
 
 if :: (lexem)
-	i f
+	/if/
 
 throw :: (lexem)
-	t h r o w
+	/throw/
 
 delete :: (lexem)
-	d e l e t e
+	/delete/
 
 in :: (lexem)
-	i n
+	/in/
 
 try :: (lexem)
-	t r y
+	/try/
 
 get :: (lexem)
-	g e t
+	/get/
 
 set :: (lexem)
-	s e t
+	/set/
 
 class :: (lexem)
-	c l a s s
+	/class/
 
 enum :: (lexem)
-	e n u m
+	/enum/
 
 extends :: (lexem)
-	e x t e n d s
+	/extends/
 
 super :: (lexem)
-	s u p e r
+	/super/
 
 const :: (lexem)
-	c o n s t
+	/const/
 
 export :: (lexem)
-	e x p o r t
+	/export/
 
 import :: (lexem)
-	i m p o r t
+	/import/
 
 { :: (lexem)
-	{
+	/\{/
 
 } :: (lexem)
-	}
+	/\}/
 
 ( :: (lexem)
-	(
+	/\(/
 
 ) :: (lexem)
-	)
+	/\)/
 
 [ :: (lexem)
-	[
+	/\[/
 
 ] :: (lexem)
-	]
+	/\]/
 
 . :: (lexem)
-	.
+	/\./
 
 ; :: (lexem)
-	;
+	/;/
 
 , :: (lexem)
-	,
+	/,/
 
 < :: (lexem)
-	<
+	/</
 
 > :: (lexem)
-	>
+	/>/
 
 <= :: (lexem)
-	< =
+	/<=/
 
 >= :: (lexem)
-	> =
+	/>=/
 
 == :: (lexem)
-	= =
+	/==/
 
 != :: (lexem)
-	! =
+	/!=/
 
 === :: (lexem)
-	= = =
+	/===/
 
 !== :: (lexem)
-	! = =
+	/!==/
 
 + :: (lexem)
-	+
+	/\+/
 
 - :: (lexem)
-	-
+	/-/
 
 * :: (lexem)
-	*
+	/\*/
 
 % :: (lexem)
-	%
+	/%/
 
 ++ :: (lexem)
-	+ +
+	/\+\+/
 
 -- :: (lexem)
-	- -
+	/--/
 
 << :: (lexem)
-	< <
+	/<</
 
 >> :: (lexem)
-	> >
+	/>>/
 
 >>> :: (lexem)
-	> > >
+	/>>>/
 
 & :: (lexem)
-	&
+	/&/
 
 | :: (lexem)
-	|
+	/\|/
 
 ^ :: (lexem)
-	^
+	/^/
 
 ! :: (lexem)
-	!
+	/!/
 
 ~ :: (lexem)
-	~
+	/~/
 
 && :: (lexem)
-	& &
+	/&&/
 
 || :: (lexem)
-	| |
+	/\|\|/
 
 ? :: (lexem)
-	?
+	/\?/
 
 : :: (lexem)
-	:
+	/:/
 
 = :: (lexem)
-	=
+	/=/
 
 += :: (lexem)
-	+ =
+	/\+=/
 
 -= :: (lexem)
-	- =
+	/-=/
 
 *= :: (lexem)
-	* =
+	/\*=/
 
 %= :: (lexem)
-	% =
+	/%=/
 
 <<= :: (lexem)
-	< < =
+	/<<=/
 
 >>= :: (lexem)
-	> > =
+	/>>=/
 
 >>>= :: (lexem)
-	> > > =
+	/>>>=/
 
 &= :: (lexem)
-	& =
+	/&=/
 
 |= :: (lexem)
-	| =
+	/\|=/
 
 ^= :: (lexem)
-	^ =
+	/^=/
 
 / :: (lexem)
-	/
+	/\//
 
 /= :: (lexem)
-	/ =
+	/\/=/
 
 Literal :
 	NullLiteral
@@ -308,76 +285,30 @@ NullLiteral :
 	null
 
 null :: (lexem)
-	n u l l
+	/null/
 
 BooleanLiteral :
 	true
 	false
 
 true :: (lexem)
-	t r u e
+	/true/
 
 false :: (lexem)
-	f a l s e
+	/false/
 
 NumericLiteral :: (lexem)
-	DecimalIntegerLiteral . DecimalDigitsopt ExponentPartopt
-	. DecimalDigits ExponentPartopt
-	DecimalIntegerLiteral ExponentPartopt
-	0 (x or X) HexDigit+
-
-DecimalIntegerLiteral ::
-	0
-	(1 or 2 or 3 or 4 or 5 or 6 or 7 or 8 or 9) DecimalDigitsopt
-
-DecimalDigits ::
-	DecimalDigit+
-
-DecimalDigit :: one of
-	0	1	2	3	4	5
-	6	7	8	9
-
-ExponentPart ::
-	(e or E) (+ or -)? DecimalDigits
-
-HexDigit :: one of
-	0	1	2	3	4	5
-	6	7	8	9	a	b
-	c	d	e	f	A	B
-	C	D	E	F
+	/(0|[1-9][0-9]+?)\.[0-9]+?([Ee][\+\-]?[0-9]+)?/
+	/\.[0-9]+([Ee][\+\-]?[0-9]+)?/
+	/(0|[1-9][0-9]+?)([Ee][\+\-]?[0-9]+)?/
+	/0[Xx][0-9A-Fa-f]+/
 
 StringLiteral :: (lexem)
-	" (/[^\n\r"\\\u2028\u2029]/ or \ EscapeSequence or LineContinuation)* "
-	' (/[^\n\r'\\\u2028\u2029]/ or \ EscapeSequence or LineContinuation)* '
-
-LineContinuation ::
-	\ (<LF> or <CR> [lookahead != <LF>] or <LS> or <PS> or <CR> <LF>)
-
-EscapeSequence ::
-	SingleEscapeCharacter
-	/[^\n\r"'0-9\\bfnrt-vx\u2028\u2029]/
-	0 [lookahead != DecimalDigit]
-	x HexDigit HexDigit
-	UnicodeEscapeSequence
-
-SingleEscapeCharacter :: one of
-	'	"	\	b	f	n
-	r	t	v
-
-UnicodeEscapeSequence ::
-	u HexDigit HexDigit HexDigit HexDigit
+	/"([^\n\r"\\\u2028\u2029]|\\(["'\\bfnrtv]|[^\n\r"'0-9\\bfnrt-vx\u2028\u2029]|0<unknown org.textway.tools.converter.spec.SLookahead@6d588325 >|x[0-9A-Fa-f][0-9A-Fa-f]|(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|(\\(\n|\r<unknown org.textway.tools.converter.spec.SLookahead@4e0a2a38 >|\u2028|\u2029|\r\n)))*"/
+	/'([^\n\r'\\\u2028\u2029]|\\(["'\\bfnrtv]|[^\n\r"'0-9\\bfnrt-vx\u2028\u2029]|0<unknown org.textway.tools.converter.spec.SLookahead@6d588325 >|x[0-9A-Fa-f][0-9A-Fa-f]|(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|(\\(\n|\r<unknown org.textway.tools.converter.spec.SLookahead@4e0a2a38 >|\u2028|\u2029|\r\n)))*'/
 
 RegularExpressionLiteral :: (lexem)
-	/ (/[^\n\r\*\/\[\\\u2028\u2029]/ or RegularExpressionBackslashSequence or RegularExpressionClass) (/[^\n\r\/\[\\\u2028\u2029]/ or RegularExpressionBackslashSequence or RegularExpressionClass)* / IdentifierPart*
-
-RegularExpressionBackslashSequence ::
-	\ RegularExpressionNonTerminator
-
-RegularExpressionNonTerminator ::
-	/[^\n\r\u2028\u2029]/
-
-RegularExpressionClass ::
-	[ (/[^\n\r\\\]\u2028\u2029]/ or RegularExpressionBackslashSequence)* ]
+	/\/([^\n\r\*\/\[\\\u2028\u2029]|(\\[^\n\r\u2028\u2029])|(\[([^\n\r\\\]\u2028\u2029]|(\\[^\n\r\u2028\u2029]))*\]))([^\n\r\/\[\\\u2028\u2029]|(\\[^\n\r\u2028\u2029])|(\[([^\n\r\\\]\u2028\u2029]|(\\[^\n\r\u2028\u2029]))*\]))*\/((\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|$|_|\\(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200c|\u200d)*/
 
 PrimaryExpression :
 	this

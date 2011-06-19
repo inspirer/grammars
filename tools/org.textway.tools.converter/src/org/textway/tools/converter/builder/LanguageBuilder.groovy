@@ -24,8 +24,8 @@ class LanguageBuilder {
         inputs.each { it.isEntry = true }
         delimeters.each { it.isEntry = true }
         reserved.each {
-            if(it.value instanceof SChoice && ((SChoice)it.value).elements.any { ExpressionUtil.unwrap(it) instanceof SReference}) {
-                ((SChoice)it.value).elements.each { ((SReference)ExpressionUtil.unwrap(it)).resolved.isEntry = true; }
+            if (it.value instanceof SChoice && ((SChoice) it.value).elements.any { ExpressionUtil.unwrap(it) instanceof SReference}) {
+                ((SChoice) it.value).elements.each { ((SReference) ExpressionUtil.unwrap(it)).resolved.isEntry = true; }
             } else {
                 it.isEntry = true
             }
@@ -76,20 +76,20 @@ class LanguageBuilder {
             term.value = ExpressionUtil.replaceSetDiff term.value, {
                 List<SExpression> plus = [];
                 List<SExpression> minus = [];
-                if(ExpressionUtil.collectSymbolsSets(it, plus, minus, true)) {
+                if (ExpressionUtil.collectSymbolsSets(it, plus, minus, true)) {
                     return (SExpression) SUtil.createDiff(
                             SUtil.createChoice(plus.collect { ExpressionUtil.clone(it) }, it.location),
-                            SUtil.createChoice(minus.collect { ExpressionUtil.clone(it) },it.location), it.location);
+                            SUtil.createChoice(minus.collect { ExpressionUtil.clone(it) }, it.location), it.location);
                 }
                 return it;
             };
         }
         for (SSymbol term: language.all.findAll {it.isTerm}) {
             term.value = ExpressionUtil.replaceSetDiff term.value, {
-                if(it.left instanceof SChoice && it.right instanceof SChoice) {
-                    List<SExpression> plus = ((SChoice)it.left).elements;
-                    List<SExpression> minus = ((SChoice)it.right).elements;
-                    if(RegexUtil.isCharacterSet(plus) && RegexUtil.isCharacterSet(minus)) {
+                if (it.left instanceof SChoice && it.right instanceof SChoice) {
+                    List<SExpression> plus = ((SChoice) it.left).elements;
+                    List<SExpression> minus = ((SChoice) it.right).elements;
+                    if (RegexUtil.isCharacterSet(plus) && RegexUtil.isCharacterSet(minus)) {
                         return (SExpression) RegexUtil.create("/" + RegexUtil.setAsString(plus, minus) + "/", it.location)
                     }
                 }
@@ -113,20 +113,20 @@ class LanguageBuilder {
     }
 
     void prepareTermForRecursionElimination(SSymbol term) {
-        if(!(term.value instanceof SChoice)) term.value = SUtil.createChoice([term.value], term.location);
-        def rules = ((SChoice)term.value).elements;
+        if (!(term.value instanceof SChoice)) term.value = SUtil.createChoice([term.value], term.location);
+        def rules = ((SChoice) term.value).elements;
 
         boolean tryAgain = true;
-        while(tryAgain) {
+        while (tryAgain) {
             tryAgain = false;
             def affected = rules.findAll { ExpressionUtil.refers(it, term)  }
-            for(def rule : affected) {
-                if(!(rule instanceof SSequence)) continue;
-                List<SExpression> ruleItems = ((SSequence)rule).elements;
+            for (def rule: affected) {
+                if (!(rule instanceof SSequence)) continue;
+                List<SExpression> ruleItems = ((SSequence) rule).elements;
                 List<SExpression> affectedItems = ruleItems.findAll { ExpressionUtil.refers(it, term) }
-                if(affectedItems.size() == 1 && affectedItems.first() instanceof SQuantifier) {
+                if (affectedItems.size() == 1 && affectedItems.first() instanceof SQuantifier) {
                     SQuantifier q = (SQuantifier) affectedItems.first();
-                    if(q.min == 0 && q.max == 1) {
+                    if (q.min == 0 && q.max == 1) {
                         def newItems = (List<SExpression>) ruleItems.collect { it != q ? ExpressionUtil.clone(it) : ExpressionUtil.unwrapSequence(q.inner) }.flatten();
                         def rule2 = SUtil.createSequence(newItems, rule.location);
                         ruleItems.remove(q);
@@ -157,9 +157,9 @@ class LanguageBuilder {
             language.all.remove(s);
             SSymbol term = toinline[s];
             term.value = ExpressionUtil.replaceReference(term.value, s, {
-                if(((SReference)it).isOptional) {
-                    if(s.value instanceof SQuantifier && ((SQuantifier)s.value).min == 1) {
-                        ((SQuantifier)s.value).min = 0;
+                if (((SReference) it).isOptional) {
+                    if (s.value instanceof SQuantifier && ((SQuantifier) s.value).min == 1) {
+                        ((SQuantifier) s.value).min = 0;
                     } else {
                         return SUtil.createQuantifier(s.value, 0, 1);
                     }
@@ -258,9 +258,20 @@ class LanguageBuilder {
     void convertLexems() {
         for (SSymbol lexem: language.all.findAll {it.isTerm && it.isEntry}) {
             def builder = new StringBuilder()
-            RegexUtil.handleRegexp(lexem.value, builder);
-            lexem.value = RegexUtil.create(builder.toString(), lexem.location);
+            if (lexem.value instanceof SChoice) {
+                def list = ((SChoice) lexem.value).elements;
+                for (int i: 0..<list.size()) {
+                    builder.setLength(0);
+                    RegexUtil.handleRegexp(list[i], builder);
+                    list[i] = RegexUtil.create(builder.toString(), lexem.location);
+                }
+
+            } else {
+                RegexUtil.handleRegexp(lexem.value, builder);
+                lexem.value = RegexUtil.create(builder.toString(), lexem.location);
+            }
         }
+        removeUnusedTermDefinitions();
     }
 
     void prepare(File optionsFile) {

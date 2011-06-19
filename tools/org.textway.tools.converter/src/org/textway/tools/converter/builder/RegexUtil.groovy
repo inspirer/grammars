@@ -24,18 +24,31 @@ class RegexUtil {
         if (c < 0x20 || c >= 0x80) {
             def ss = Integer.toHexString((int) c);
             ss = "0000".substring(ss.length()) + ss
-            return "\\x" + ss;
+            return "\\u" + ss;
         }
         return c;
     }
 
     static void handleRegexp(SExpression expr, StringBuilder sb) {
         sb.append("/");
-        buildRegexp(expr, sb, 0);
+        buildRegexp(expr, sb, 0, false);
         sb.append("/");
     }
 
-    private static void buildRegexp(SExpression expr, StringBuilder sb, int deep) {
+    private static boolean toCharacterSet(SExpression expr, List<SExpression> plus) {
+        expr = ExpressionUtil.unwrap(expr);
+        if (expr instanceof SReference) {
+            return toCharacterSet(expr.resolved.value, plus);
+        } else if (expr instanceof SChoice) {
+            return expr.elements.every { toCharacterSet(it, plus) }
+        } else if (expr instanceof SCharacter || expr instanceof SUnicodeCategory) {
+            plus.add(expr);
+            return true;
+        }
+        return false;
+    }
+
+    private static void buildRegexp(SExpression expr, StringBuilder sb, int deep, boolean needParens) {
         if (expr == null) {
             throw new ConvertException("unknown", "null expression");
         }
@@ -48,33 +61,48 @@ class RegexUtil {
             if (size == 0) {
                 throw new ConvertException(expr.location, "empty choice");
             } else if (size == 1) {
-                buildRegexp(expr.elements.first(), sb, deep);
+                buildRegexp(expr.elements.first(), sb, deep, needParens);
             } else {
-                sb.append("(");
-                boolean first = true;
-                for (SExpression e: expr.elements) {
-                    if (!first) {
-                        sb.append("|");
-                    } else {
-                        first = false;
+                def plus = [];
+                if (toCharacterSet(expr, plus)) {
+                    sb.append(setAsString(plus, []));
+                } else {
+                    if (needParens) sb.append("(");
+                    boolean first = true;
+                    for (SExpression e: expr.elements) {
+                        if (!first) {
+                            sb.append("|");
+                        } else {
+                            first = false;
+                        }
+                        buildRegexp(e, sb, deep, !(e instanceof SSequence));
                     }
-                    buildRegexp(e, sb, deep);
+                    if (needParens) sb.append(")");
                 }
-                sb.append(")");
             }
         } else if (expr instanceof SSequence) {
+            if (needParens) sb.append("(");
             for (SExpression e: expr.elements) {
-                buildRegexp(e, sb, deep);
+                buildRegexp(e, sb, deep, true);
             }
+            if (needParens) sb.append(")");
         } else if (expr instanceof SCharacter) {
             sb.append(toRegexp(((SCharacter) expr).c, false))
 
         } else if (expr instanceof SUnicodeCategory) {
             sb.append("\\p{" + expr.name + "}")
 
-//        } else if(expr instanceof SReference) {
-            //            def sym = expr.resolved;
-            //            buildRegexp(sym.value, sb, deep+1);
+        } else if (expr instanceof SReference) {
+            def sym = expr.resolved;
+            buildRegexp(sym.value, sb, deep + 1, needParens || expr.isOptional);
+            if (expr.isOptional) {
+                sb.append('?');
+            }
+        } else if (expr instanceof SQuantifier) {
+            buildRegexp(expr.inner, sb, deep + 1, true);
+            sb.append(quantifierAsString(expr.min, expr.max));
+        } else if (expr instanceof SRegexp) {
+            sb.append(expr.text[1..-2]);
 
         } else {
             sb.append("<unknown ${expr} >")
@@ -106,13 +134,29 @@ class RegexUtil {
         }
     }
 
-    private static void setElementToString(StringBuilder sb, SExpression expr) {
-        if (expr instanceof SCharacter) {
-            sb.append(toRegexp(expr.c, true));
-        } else if (expr instanceof SUnicodeCategory) {
-            sb.append("\\p{" + expr.name + "}");
-        } else {
-            throw new ConvertException(expr.location, "expr cannot be used in set");
+    private static void setElementToString(StringBuilder sb, List<SExpression> list) {
+        List<Integer> charList = list.findAll {it instanceof SCharacter}.collect { (int) ((SCharacter) it).c};
+        Integer[] chars = charList.toArray(new Integer[charList.size()]);
+        Arrays.sort(chars);
+        for (int i = 0; i < chars.length; i++) {
+            sb.append(toRegexp((char) chars[i], true));
+            if (i + 1 < chars.length && chars[i + 1] == chars[i] + 1) {
+                int originalI = i;
+                while (i + 1 < chars.length && chars[i + 1] == chars[i] + 1) {
+                    i++;
+                }
+                if (originalI + 1 < i)
+                    sb.append("-");
+                sb.append(toRegexp((char) chars[i], true));
+            }
+        }
+
+        for (SExpression expr: list.findAll { !(it instanceof SCharacter) }) {
+            if (expr instanceof SUnicodeCategory) {
+                sb.append("\\p{" + expr.name + "}");
+            } else {
+                throw new ConvertException(expr.location, "expr cannot be used in set");
+            }
         }
     }
 
@@ -124,7 +168,7 @@ class RegexUtil {
         StringBuilder sb = new StringBuilder();
         if (!plus.isEmpty()) {
             sb.append("[")
-            plus.each { setElementToString(sb, it) }
+            setElementToString(sb, plus);
             sb.append("]")
         }
         if (!minus.isEmpty()) {
@@ -133,8 +177,9 @@ class RegexUtil {
             } else {
                 sb.append("{-}[")
             }
-            minus.each { setElementToString(sb, it) }
+            setElementToString(sb, minus);
             sb.append("]")
         }
+        sb.toString()
     }
 }
