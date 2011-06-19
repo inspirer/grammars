@@ -140,29 +140,34 @@ class ExpressionUtil {
 
     static boolean collectSymbolsSets(SExpression expr, List<SExpression> plus, List<SExpression> minus, boolean inPlus) {
         expr = unwrap(expr);
-        if(expr instanceof SSetDiff) {
-            if(!inPlus) {
+        if (expr instanceof SSetDiff) {
+            if (!inPlus) {
                 throw new ConvertException(expr.location, "cannot process double negation in nested setdiff");
             }
             return collectSymbolsSets(expr.left, plus, minus, true) && collectSymbolsSets(expr.right, plus, minus, false);
-        } else if(expr instanceof SReference) {
+        } else if (expr instanceof SReference) {
             return collectSymbolsSets(expr.resolved.value, plus, minus, inPlus);
-        } else if(expr instanceof SChoice) {
+        } else if (expr instanceof SChoice) {
             return expr.elements.every { collectSymbolsSets(it, plus, minus, inPlus) }
-        } else if(expr instanceof SCharacter || expr instanceof SUnicodeCategory) {
-            if(inPlus) {
+        } else if (expr instanceof SCharacter || expr instanceof SUnicodeCategory) {
+            if (inPlus) {
                 plus.add(expr);
             } else {
                 minus.add(expr);
             }
             return true;
-        } else if(expr instanceof SAnyChar) {
-            if(!inPlus) {
+        } else if (expr instanceof SAnyChar) {
+            if (!inPlus) {
                 throw new ConvertException(expr.location, "[any character] found in negation");
             }
             return true;
         }
         return false;
+    }
+
+    static boolean allEquals(List<SExpression> list) {
+        def first = list.first();
+        return list.size() < 2 || list.tail().every {equals(it, first)}
     }
 
     static boolean equals(SExpression e1, SExpression e2) {
@@ -190,6 +195,8 @@ class ExpressionUtil {
             return e1.min == e2.min && e1.max == e2.max && equals(e1.inner, e2.inner);
         } else if (e1 instanceof SUnicodeCategory && e2 instanceof SUnicodeCategory) {
             return e1.name.equals(e2.name);
+        } else if (e1 instanceof SRegexp && e2 instanceof SRegexp) {
+            return e1.text == e2.text;
         }
 
         return false;
@@ -243,6 +250,45 @@ class ExpressionUtil {
         }
     }
 
+    private static List<SExpression> extractCommonPrefixOrSuffix(List<SExpression> list, boolean prefix) {
+        def result = [];
+        if (list.size() < 2) return result;
+
+        boolean tryAgain = true;
+        while (tryAgain) {
+            tryAgain = false;
+            if (list.any { ((SSequence) it).elements.isEmpty() }) break;
+            def firsts = prefix ? list.collect {((SSequence) it).elements.first()} : list.collect {((SSequence) it).elements.last()};
+            if (allEquals(firsts)) {
+                tryAgain = true;
+                result.add(firsts.first());
+                list.each {((SSequence) it).elements.remove(prefix ? 0 : ((SSequence) it).elements.size() - 1)};
+            }
+        }
+        return result;
+    }
+
+    private static void extractCommonParts(SSequence expr) {
+        boolean tryAgain = true;
+        while (tryAgain) {
+            tryAgain = false;
+            for (SChoice c: (List) expr.elements.findAll { it instanceof SChoice && it.elements.every {it instanceof SSequence} }) {
+                List<SExpression> common = extractCommonPrefixOrSuffix(c.elements, true);
+                if (common.size() > 0) {
+                    expr.elements.addAll(expr.elements.indexOf(c), common);
+                    tryAgain = true;
+                    break;
+                }
+                common = extractCommonPrefixOrSuffix(c.elements, false);
+                if (common.size() > 0) {
+                    expr.elements.addAll(expr.elements.indexOf(c) + 1, common);
+                    tryAgain = true;
+                    break;
+                }
+            }
+        }
+    }
+
     static SExpression simplify(SExpression expr) {
         if (expr instanceof SSequence) {
             for (int i: 0..<expr.elements.size()) {
@@ -253,6 +299,8 @@ class ExpressionUtil {
             }
             if (expr.elements.size() == 1) return expr.elements.first();
             combineQuantifiers(expr)
+            if (expr.elements.size() == 1) return expr.elements.first();
+            extractCommonParts(expr);
         } else if (expr instanceof SChoice) {
             for (int i: 0..<expr.elements.size()) {
                 expr.elements[i] = simplify(expr.elements[i])

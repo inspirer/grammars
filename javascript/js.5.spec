@@ -324,7 +324,7 @@ NumericLiteral :: (lexem)
 	DecimalIntegerLiteral . DecimalDigitsopt ExponentPartopt
 	. DecimalDigits ExponentPartopt
 	DecimalIntegerLiteral ExponentPartopt
-	(0 x HexDigit or 0 X HexDigit) HexDigit*
+	0 (x or X) HexDigit+
 
 DecimalIntegerLiteral ::
 	0

@@ -71,6 +71,7 @@ class Converter {
         save(lang, 4)
 
         builder.substituteSetDiffs();
+        builder.simplifyLexerRules();
 
         save(lang, 5);
     }
