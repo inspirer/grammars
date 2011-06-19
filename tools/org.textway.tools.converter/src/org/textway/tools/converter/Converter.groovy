@@ -69,6 +69,10 @@ class Converter {
         builder.simplifyLexerRules();
 
         save(lang, 4)
+
+        builder.substituteSetDiffs();
+
+        save(lang, 5);
     }
 
     static void save(SLanguage lang, int step) {

@@ -50,8 +50,12 @@ class LanguageBuilder {
                 throw new ConvertException(s.location, "non-term ${s.name} is not used");
             }
         }
+        removeUnusedTermDefinitions();
+    }
 
-        // unused terms
+
+    void removeUnusedTermDefinitions() {
+        Queue<SSymbol> queue = new LinkedList<SSymbol>();
         Set<SSymbol> usedTerms = language.all.findAll {it.isTerm && it.isEntry};
         queue.addAll(usedTerms);
         while (!queue.isEmpty()) {
@@ -65,6 +69,33 @@ class LanguageBuilder {
         }
 
         language.all.retainAll { it.isEntry || usedTerms.contains(it) }
+    }
+
+    void substituteSetDiffs() {
+        for (SSymbol term: language.all.findAll {it.isTerm}) {
+            term.value = ExpressionUtil.replaceSetDiff term.value, {
+                List<SExpression> plus = [];
+                List<SExpression> minus = [];
+                if(ExpressionUtil.collectSymbolsSets(it, plus, minus, true)) {
+                    return (SExpression) SUtil.createDiff(
+                            SUtil.createChoice(plus.collect { ExpressionUtil.clone(it) }, it.location),
+                            SUtil.createChoice(minus.collect { ExpressionUtil.clone(it) },it.location), it.location);
+                }
+                return it;
+            };
+        }
+        for (SSymbol term: language.all.findAll {it.isTerm}) {
+            term.value = ExpressionUtil.replaceSetDiff term.value, {
+                if(it.left instanceof SChoice && it.right instanceof SChoice) {
+                    List<SExpression> plus = ((SChoice)it.left).elements;
+                    List<SExpression> minus = ((SChoice)it.right).elements;
+                    if(RegexUtil.isCharacterSet(plus) && RegexUtil.isCharacterSet(minus)) {
+                        return (SExpression) RegexUtil.create("/" + RegexUtil.setAsString(plus, minus) + "/", it.location)
+                    }
+                }
+                return it;
+            };
+        }
     }
 
     void eliminateRecursionInTerms() {

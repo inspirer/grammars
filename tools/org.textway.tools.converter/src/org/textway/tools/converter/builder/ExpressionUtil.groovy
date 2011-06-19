@@ -121,6 +121,50 @@ class ExpressionUtil {
         return expr;
     }
 
+    static SExpression replaceSetDiff(SExpression expr, Closure<SExpression> cl) {
+        if (expr instanceof SSequence) {
+            for (int i: 0..<expr.elements.size()) {
+                expr.elements[i] = replaceSetDiff(expr.elements[i], cl)
+            }
+        } else if (expr instanceof SChoice) {
+            for (int i: 0..<expr.elements.size()) {
+                expr.elements[i] = replaceSetDiff(expr.elements[i], cl)
+            }
+        } else if (expr instanceof SSetDiff) {
+            return cl.call(expr);
+        } else if (expr instanceof SQuantifier) {
+            expr.inner = replaceSetDiff(expr.inner, cl);
+        }
+        return expr;
+    }
+
+    static boolean collectSymbolsSets(SExpression expr, List<SExpression> plus, List<SExpression> minus, boolean inPlus) {
+        expr = unwrap(expr);
+        if(expr instanceof SSetDiff) {
+            if(!inPlus) {
+                throw new ConvertException(expr.location, "cannot process double negation in nested setdiff");
+            }
+            return collectSymbolsSets(expr.left, plus, minus, true) && collectSymbolsSets(expr.right, plus, minus, false);
+        } else if(expr instanceof SReference) {
+            return collectSymbolsSets(expr.resolved.value, plus, minus, inPlus);
+        } else if(expr instanceof SChoice) {
+            return expr.elements.every { collectSymbolsSets(it, plus, minus, inPlus) }
+        } else if(expr instanceof SCharacter || expr instanceof SUnicodeCategory) {
+            if(inPlus) {
+                plus.add(expr);
+            } else {
+                minus.add(expr);
+            }
+            return true;
+        } else if(expr instanceof SAnyChar) {
+            if(!inPlus) {
+                throw new ConvertException(expr.location, "[any character] found in negation");
+            }
+            return true;
+        }
+        return false;
+    }
+
     static boolean equals(SExpression e1, SExpression e2) {
         e1 = unwrap(e1);
         e2 = unwrap(e2);

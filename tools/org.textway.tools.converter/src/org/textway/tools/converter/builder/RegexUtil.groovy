@@ -1,13 +1,8 @@
 package org.textway.tools.converter.builder
 
 import org.textway.tools.converter.ConvertException
-import org.textway.tools.converter.spec.SCharacter
-import org.textway.tools.converter.spec.SChoice
-import org.textway.tools.converter.spec.SExpression
-import org.textway.tools.converter.spec.SSequence
 import org.textway.tools.converter.syntax.SRegexp
-import org.textway.tools.converter.spec.SUnicodeCategory
-import org.textway.tools.converter.spec.SReference
+import org.textway.tools.converter.spec.*
 
 class RegexUtil {
 
@@ -27,7 +22,7 @@ class RegexUtil {
             return "\\${c}";
         }
         if (c < 0x20 || c >= 0x80) {
-            def ss = Integer.toHexString((int)c);
+            def ss = Integer.toHexString((int) c);
             ss = "0000".substring(ss.length()) + ss
             return "\\x" + ss;
         }
@@ -44,7 +39,7 @@ class RegexUtil {
         if (expr == null) {
             throw new ConvertException("unknown", "null expression");
         }
-        if(deep > 128) {
+        if (deep > 128) {
             throw new ConvertException(expr.location, "lexems: cycle detected");
         }
 
@@ -72,14 +67,14 @@ class RegexUtil {
                 buildRegexp(e, sb, deep);
             }
         } else if (expr instanceof SCharacter) {
-            sb.append(toRegexp(((SCharacter)expr).c, false))
+            sb.append(toRegexp(((SCharacter) expr).c, false))
 
-        } else if(expr instanceof SUnicodeCategory) {
+        } else if (expr instanceof SUnicodeCategory) {
             sb.append("\\p{" + expr.name + "}")
 
 //        } else if(expr instanceof SReference) {
-//            def sym = expr.resolved;
-//            buildRegexp(sym.value, sb, deep+1);
+            //            def sym = expr.resolved;
+            //            buildRegexp(sym.value, sb, deep+1);
 
         } else {
             sb.append("<unknown ${expr} >")
@@ -94,20 +89,52 @@ class RegexUtil {
     }
 
     static String quantifierAsString(int min, int max) {
-        if(max == -1) {
-            if(min == 0) {
+        if (max == -1) {
+            if (min == 0) {
                 return '*';
-            } else if(min == 1) {
+            } else if (min == 1) {
                 return '+';
             } else {
                 return "{${min},}";
             }
-        } else if(min == 0 && max == 1) {
+        } else if (min == 0 && max == 1) {
             return '?';
-        } else if(min == max) {
+        } else if (min == max) {
             return "{${min}}";
         } else {
             return "{${min},${max}}";
+        }
+    }
+
+    private static void setElementToString(StringBuilder sb, SExpression expr) {
+        if (expr instanceof SCharacter) {
+            sb.append(toRegexp(expr.c, true));
+        } else if (expr instanceof SUnicodeCategory) {
+            sb.append("\\p{" + expr.name + "}");
+        } else {
+            throw new ConvertException(expr.location, "expr cannot be used in set");
+        }
+    }
+
+    static boolean isCharacterSet(List<SExpression> list) {
+        return list.every {it instanceof SCharacter || it instanceof SUnicodeCategory};
+    }
+
+    static String setAsString(List<SExpression> plus, List<SExpression> minus) {
+        StringBuilder sb = new StringBuilder();
+        if (!plus.isEmpty()) {
+            sb.append("[")
+            plus.each { setElementToString(sb, it) }
+            sb.append("]")
+        }
+        if (!minus.isEmpty()) {
+            if (plus.isEmpty()) {
+                sb.append("[^")
+            } else {
+                sb.append("{-}[")
+            }
+            minus.each { setElementToString(sb, it) }
+            sb.append("]")
         }
     }
 }
