@@ -5,43 +5,43 @@ LineTerminator: /[\n\r\u2028\u2029]/
 Comment: /\/\*(([^\*]*\*+[^\*\/])*([^\*]*\**)?)?\*\//
 Comment: /\/\/[^\n\r\u2028\u2029]*/
 
-Identifier: /<unknown org.textway.tools.converter.spec.SSetDiff@2c61ec49 >/
+Identifier: /<unknown org.textway.tools.converter.spec.SSetDiff@707efa96 >/
 IdentifierName: /(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|$|_|\\(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))((\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|$|_|\\(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200c|\u200d)*/
-break: /break/
-do: /do/
-instanceof: /instanceof/
-typeof: /typeof/
-case: /case/
-else: /else/
-new: /new/
-var: /var/
-catch: /catch/
-finally: /finally/
-return: /return/
-void: /void/
-continue: /continue/
-for: /for/
-switch: /switch/
-while: /while/
-debugger: /debugger/
-function: /function/
-this: /this/
-with: /with/
-default: /default/
-if: /if/
-throw: /throw/
-delete: /delete/
-in: /in/
-try: /try/
-get: /get/
-set: /set/
-class: /class/
-enum: /enum/
-extends: /extends/
-super: /super/
-const: /const/
-export: /export/
-import: /import/
+kw_break: /break/
+kw_do: /do/
+kw_instanceof: /instanceof/
+kw_typeof: /typeof/
+kw_case: /case/
+kw_else: /else/
+kw_new: /new/
+kw_var: /var/
+kw_catch: /catch/
+kw_finally: /finally/
+kw_return: /return/
+kw_void: /void/
+kw_continue: /continue/
+kw_for: /for/
+kw_switch: /switch/
+kw_while: /while/
+kw_debugger: /debugger/
+kw_function: /function/
+kw_this: /this/
+kw_with: /with/
+kw_default: /default/
+kw_if: /if/
+kw_throw: /throw/
+kw_delete: /delete/
+kw_in: /in/
+kw_try: /try/
+kw_get: /get/
+kw_set: /set/
+kw_class: /class/
+kw_enum: /enum/
+kw_extends: /extends/
+kw_super: /super/
+kw_const: /const/
+kw_export: /export/
+kw_import: /import/
 '{': /\{/
 '}': /\}/
 '(': /\(/
@@ -90,9 +90,9 @@ import: /import/
 '^=': /^=/
 '/': /\//
 '/=': /\/=/
-null: /null/
-true: /true/
-false: /false/
+kw_null: /null/
+kw_true: /true/
+kw_false: /false/
 NumericLiteral: /(0|[1-9][0-9]+?)\.[0-9]+?([Ee][\+\-]?[0-9]+)?/
 NumericLiteral: /\.[0-9]+([Ee][\+\-]?[0-9]+)?/
 NumericLiteral: /(0|[1-9][0-9]+?)([Ee][\+\-]?[0-9]+)?/
@@ -114,16 +114,16 @@ Literal ::=
 ;
 
 NullLiteral ::=
-	  null
+	  kw_null
 ;
 
 BooleanLiteral ::=
-	  true
-	| false
+	  kw_true
+	| kw_false
 ;
 
 PrimaryExpression ::=
-	  this
+	  kw_this
 	| Identifier
 	| Literal
 	| ArrayLiteral
@@ -160,8 +160,8 @@ PropertyNameAndValueList ::=
 
 PropertyAssignment ::=
 	  PropertyName ':' AssignmentExpression
-	| get PropertyName '(' ')' '{' FunctionBody '}'
-	| set PropertyName '(' PropertySetParameterList ')' '{' FunctionBody '}'
+	| kw_get PropertyName '(' ')' '{' FunctionBody '}'
+	| kw_set PropertyName '(' PropertySetParameterList ')' '{' FunctionBody '}'
 ;
 
 PropertyName ::=
@@ -179,12 +179,12 @@ MemberExpression ::=
 	| FunctionExpression
 	| MemberExpression '[' Expression ']'
 	| MemberExpression '.' IdentifierName
-	| new MemberExpression Arguments
+	| kw_new MemberExpression Arguments
 ;
 
 NewExpression ::=
 	  MemberExpression
-	| new NewExpression
+	| kw_new NewExpression
 ;
 
 CallExpression ::=
@@ -217,9 +217,9 @@ PostfixExpression ::=
 
 UnaryExpression ::=
 	  PostfixExpression
-	| delete UnaryExpression
-	| void UnaryExpression
-	| typeof UnaryExpression
+	| kw_delete UnaryExpression
+	| kw_void UnaryExpression
+	| kw_typeof UnaryExpression
 	| '++' UnaryExpression
 	| '--' UnaryExpression
 	| '+' UnaryExpression
@@ -254,8 +254,8 @@ RelationalExpression ::=
 	| RelationalExpression '>' ShiftExpression
 	| RelationalExpression '<=' ShiftExpression
 	| RelationalExpression '>=' ShiftExpression
-	| RelationalExpression instanceof ShiftExpression
-	| RelationalExpression in ShiftExpression
+	| RelationalExpression kw_instanceof ShiftExpression
+	| RelationalExpression kw_in ShiftExpression
 ;
 
 RelationalExpressionNoIn ::=
@@ -264,7 +264,7 @@ RelationalExpressionNoIn ::=
 	| RelationalExpressionNoIn '>' ShiftExpression
 	| RelationalExpressionNoIn '<=' ShiftExpression
 	| RelationalExpressionNoIn '>=' ShiftExpression
-	| RelationalExpressionNoIn instanceof ShiftExpression
+	| RelationalExpressionNoIn kw_instanceof ShiftExpression
 ;
 
 EqualityExpression ::=
@@ -406,7 +406,7 @@ StatementList ::=
 ;
 
 VariableStatement ::=
-	  var VariableDeclarationList ';'
+	  kw_var VariableDeclarationList ';'
 ;
 
 VariableDeclarationList ::=
@@ -440,41 +440,41 @@ EmptyStatement ::=
 ;
 
 ExpressionStatement ::=
-	  [lookahead != '{' function] Expression ';'
+	  [lookahead != '{' kw_function] Expression ';'
 ;
 
 IfStatement ::=
-	  if '(' Expression ')' Statement else Statement
-	| if '(' Expression ')' Statement
+	  kw_if '(' Expression ')' Statement kw_else Statement
+	| kw_if '(' Expression ')' Statement
 ;
 
 IterationStatement ::=
-	  do Statement while '(' Expression ')' ';'
-	| while '(' Expression ')' Statement
-	| for '(' ExpressionNoInopt ';' Expressionopt ';' Expressionopt ')' Statement
-	| for '(' var VariableDeclarationListNoIn ';' Expressionopt ';' Expressionopt ')' Statement
-	| for '(' LeftHandSideExpression in Expression ')' Statement
-	| for '(' var VariableDeclarationNoIn in Expression ')' Statement
+	  kw_do Statement kw_while '(' Expression ')' ';'
+	| kw_while '(' Expression ')' Statement
+	| kw_for '(' ExpressionNoInopt ';' Expressionopt ';' Expressionopt ')' Statement
+	| kw_for '(' kw_var VariableDeclarationListNoIn ';' Expressionopt ';' Expressionopt ')' Statement
+	| kw_for '(' LeftHandSideExpression kw_in Expression ')' Statement
+	| kw_for '(' kw_var VariableDeclarationNoIn kw_in Expression ')' Statement
 ;
 
 ContinueStatement ::=
-	  continue [no LineTerminator here] Identifieropt ';'
+	  kw_continue [no LineTerminator here] Identifieropt ';'
 ;
 
 BreakStatement ::=
-	  break [no LineTerminator here] Identifieropt ';'
+	  kw_break [no LineTerminator here] Identifieropt ';'
 ;
 
 ReturnStatement ::=
-	  return [no LineTerminator here] Expressionopt ';'
+	  kw_return [no LineTerminator here] Expressionopt ';'
 ;
 
 WithStatement ::=
-	  with '(' Expression ')' Statement
+	  kw_with '(' Expression ')' Statement
 ;
 
 SwitchStatement ::=
-	  switch '(' Expression ')' CaseBlock
+	  kw_switch '(' Expression ')' CaseBlock
 ;
 
 CaseBlock ::=
@@ -488,11 +488,11 @@ CaseClauses ::=
 ;
 
 CaseClause ::=
-	  case Expression ':' StatementListopt
+	  kw_case Expression ':' StatementListopt
 ;
 
 DefaultClause ::=
-	  default ':' StatementListopt
+	  kw_default ':' StatementListopt
 ;
 
 LabelledStatement ::=
@@ -500,33 +500,33 @@ LabelledStatement ::=
 ;
 
 ThrowStatement ::=
-	  throw [no LineTerminator here] Expression ';'
+	  kw_throw [no LineTerminator here] Expression ';'
 ;
 
 TryStatement ::=
-	  try Block Catch
-	| try Block Finally
-	| try Block Catch Finally
+	  kw_try Block Catch
+	| kw_try Block Finally
+	| kw_try Block Catch Finally
 ;
 
 Catch ::=
-	  catch '(' Identifier ')' Block
+	  kw_catch '(' Identifier ')' Block
 ;
 
 Finally ::=
-	  finally Block
+	  kw_finally Block
 ;
 
 DebuggerStatement ::=
-	  debugger ';'
+	  kw_debugger ';'
 ;
 
 FunctionDeclaration ::=
-	  function Identifier '(' FormalParameterListopt ')' '{' FunctionBody '}'
+	  kw_function Identifier '(' FormalParameterListopt ')' '{' FunctionBody '}'
 ;
 
 FunctionExpression ::=
-	  function Identifieropt '(' FormalParameterListopt ')' '{' FunctionBody '}'
+	  kw_function Identifieropt '(' FormalParameterListopt ')' '{' FunctionBody '}'
 ;
 
 FormalParameterList ::=

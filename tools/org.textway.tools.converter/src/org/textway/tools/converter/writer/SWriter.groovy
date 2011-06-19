@@ -23,7 +23,9 @@ class SWriter {
         sb.append("# ${language.name}\n\n");
         if (level >= 7) {
             for(SSymbol s : language.all.findAll { it.isEntry }) {
-                names[s.name] = isIdentifier(s.name) ? s.name : '\'' + s.name + '\'';
+                names[s.name] = isIdentifier(s.name) ? (
+                    isKeyword(s.name) ? "kw_${s.name}" : s.name
+                ) : '\'' + s.name + '\'';
             }
 
             for (s in language.all.findAll {it.isTerm && it.isEntry}) {
@@ -184,5 +186,9 @@ class SWriter {
 
     boolean isIdentifier(String s) {
         return s.matches(~/[a-zA-Z_][a-zA-Z_0-9]*/);
+    }
+
+    boolean isKeyword(String s) {
+        return s.matches(~/[a-z]+/);
     }
 }
