@@ -197,6 +197,31 @@ class ExpressionUtil {
             return e1.name.equals(e2.name);
         } else if (e1 instanceof SRegexp && e2 instanceof SRegexp) {
             return e1.text == e2.text;
+        } else if(e1 instanceof SSetDiff && e2 instanceof SSetDiff) {
+            return equals(e1.left, e2.left) && equals(e1.right, e2.right);
+        } else if(e1 instanceof SChoice && e2 instanceof SChoice) {
+            List<SExpression> list1 = e1.elements.toList()
+            List<SExpression> list2 = e2.elements.toList()
+            if(list1.size() != list2.size()) {
+                return false;
+            }
+
+            for(SExpression ee1 : list1) {
+                Iterator<SExpression> it2 = list2.iterator();
+                boolean found = false;
+                while(it2.hasNext()) {
+                    def ee2 = it2.next();
+                    if(equals(ee2, ee1)) {
+                        found = true;
+                        it2.remove();
+                        break;
+                    }
+                }
+                if(!found) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         return false;

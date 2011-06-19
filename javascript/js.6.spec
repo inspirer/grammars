@@ -20,7 +20,7 @@ Comment :: (lexem)
 	/\/\/[^\n\r\u2028\u2029]*/
 
 Identifier :: (lexem)
-	/<unknown org.textway.tools.converter.spec.SSetDiff@63db6942 >/
+	/<unknown org.textway.tools.converter.spec.SSetDiff@520e7d53 >/
 
 IdentifierName :: (lexem)
 	/(\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|$|_|\\(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))((\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|$|_|\\(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200c|\u200d)*/
@@ -304,8 +304,8 @@ NumericLiteral :: (lexem)
 	/0[Xx][0-9A-Fa-f]+/
 
 StringLiteral :: (lexem)
-	/"([^\n\r"\\\u2028\u2029]|\\(["'\\bfnrtv]|[^\n\r"'0-9\\bfnrt-vx\u2028\u2029]|0<unknown org.textway.tools.converter.spec.SLookahead@6d588325 >|x[0-9A-Fa-f][0-9A-Fa-f]|(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|(\\(\n|\r<unknown org.textway.tools.converter.spec.SLookahead@4e0a2a38 >|\u2028|\u2029|\r\n)))*"/
-	/'([^\n\r'\\\u2028\u2029]|\\(["'\\bfnrtv]|[^\n\r"'0-9\\bfnrt-vx\u2028\u2029]|0<unknown org.textway.tools.converter.spec.SLookahead@6d588325 >|x[0-9A-Fa-f][0-9A-Fa-f]|(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|(\\(\n|\r<unknown org.textway.tools.converter.spec.SLookahead@4e0a2a38 >|\u2028|\u2029|\r\n)))*'/
+	/"([^\n\r"\\\u2028\u2029]|\\(["'\\bfnrtv]|[^\n\r"'0-9\\bfnrt-vx\u2028\u2029]|0(?![0-9])|x[0-9A-Fa-f][0-9A-Fa-f]|(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|(\\(\n|\r(?!\n)|\u2028|\u2029|\r\n)))*"/
+	/'([^\n\r'\\\u2028\u2029]|\\(["'\\bfnrtv]|[^\n\r"'0-9\\bfnrt-vx\u2028\u2029]|0(?![0-9])|x[0-9A-Fa-f][0-9A-Fa-f]|(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|(\\(\n|\r(?!\n)|\u2028|\u2029|\r\n)))*'/
 
 RegularExpressionLiteral :: (lexem)
 	/\/([^\n\r\*\/\[\\\u2028\u2029]|(\\[^\n\r\u2028\u2029])|(\[([^\n\r\\\]\u2028\u2029]|(\\[^\n\r\u2028\u2029]))*\]))([^\n\r\/\[\\\u2028\u2029]|(\\[^\n\r\u2028\u2029])|(\[([^\n\r\\\]\u2028\u2029]|(\\[^\n\r\u2028\u2029]))*\]))*\/((\p{Lu}|\p{Ll}|\p{Lt}|\p{Lm}|\p{Lo}|\p{Nl}|$|_|\\(u[0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f][0-9A-Fa-f]))|\p{Mn}|\p{Mc}|\p{Nd}|\p{Pc}|\u200c|\u200d)*/

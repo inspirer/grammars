@@ -17,10 +17,10 @@ LineTerminator :: (lexem)
 
 Comment :: (lexem)
 	/ * MultiLineCommentCharsopt * /
-	/ / /[^\n\r\u2028\u2029]/*
+	/ / ([empty] but not (<LF> or <CR> or <LS> or <PS>))*
 
 MultiLineCommentChars ::
-	(/[^\*]/* *+ /[^\*\/]/)* (/[^\*]/* **)?
+	(([empty] but not *)* *+ ([empty] but not (/ or *)))* (([empty] but not *)* **)?
 
 Identifier :: (lexem)
 	IdentifierName but not (break or do or instanceof or typeof or case or else or new or var or catch or finally or return or void or continue or for or switch or while or debugger or function or this or with or default or if or throw or delete or in or try or get or set or class or enum or extends or super or const or export or import or NullLiteral or BooleanLiteral)
@@ -347,15 +347,15 @@ HexDigit :: one of
 	C	D	E	F
 
 StringLiteral :: (lexem)
-	" (/[^\n\r"\\\u2028\u2029]/ or \ EscapeSequence or LineContinuation)* "
-	' (/[^\n\r'\\\u2028\u2029]/ or \ EscapeSequence or LineContinuation)* '
+	" (([empty] but not (" or \ or <LF> or <CR> or <LS> or <PS>)) or \ EscapeSequence or LineContinuation)* "
+	' (([empty] but not (' or \ or <LF> or <CR> or <LS> or <PS>)) or \ EscapeSequence or LineContinuation)* '
 
 LineContinuation ::
 	\ (<LF> or <CR> [lookahead != <LF>] or <LS> or <PS> or <CR> <LF>)
 
 EscapeSequence ::
 	SingleEscapeCharacter
-	/[^\n\r"'0-9\\bfnrt-vx\u2028\u2029]/
+	[empty] but not (' or " or \ or b or f or n or r or t or v or 0 or 1 or 2 or 3 or 4 or 5 or 6 or 7 or 8 or 9 or x or u or <LF> or <CR> or <LS> or <PS>)
 	0 [lookahead != DecimalDigit]
 	x HexDigit HexDigit
 	UnicodeEscapeSequence
@@ -368,16 +368,16 @@ UnicodeEscapeSequence ::
 	u HexDigit HexDigit HexDigit HexDigit
 
 RegularExpressionLiteral :: (lexem)
-	/ (/[^\n\r\*\/\[\\\u2028\u2029]/ or RegularExpressionBackslashSequence or RegularExpressionClass) (/[^\n\r\/\[\\\u2028\u2029]/ or RegularExpressionBackslashSequence or RegularExpressionClass)* / IdentifierPart*
+	/ (([empty] but not (<LF> or <CR> or <LS> or <PS> or * or \ or / or [)) or RegularExpressionBackslashSequence or RegularExpressionClass) (([empty] but not (<LF> or <CR> or <LS> or <PS> or \ or / or [)) or RegularExpressionBackslashSequence or RegularExpressionClass)* / IdentifierPart*
 
 RegularExpressionBackslashSequence ::
 	\ RegularExpressionNonTerminator
 
 RegularExpressionNonTerminator ::
-	/[^\n\r\u2028\u2029]/
+	[empty] but not (<LF> or <CR> or <LS> or <PS>)
 
 RegularExpressionClass ::
-	[ (/[^\n\r\\\]\u2028\u2029]/ or RegularExpressionBackslashSequence)* ]
+	[ (([empty] but not (<LF> or <CR> or <LS> or <PS> or ] or \)) or RegularExpressionBackslashSequence)* ]
 
 PrimaryExpression :
 	this

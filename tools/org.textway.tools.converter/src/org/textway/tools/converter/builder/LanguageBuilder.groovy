@@ -84,18 +84,6 @@ class LanguageBuilder {
                 return it;
             };
         }
-        for (SSymbol term: language.all.findAll {it.isTerm}) {
-            term.value = ExpressionUtil.replaceSetDiff term.value, {
-                if (it.left instanceof SChoice && it.right instanceof SChoice) {
-                    List<SExpression> plus = ((SChoice) it.left).elements;
-                    List<SExpression> minus = ((SChoice) it.right).elements;
-                    if (RegexUtil.isCharacterSet(plus) && RegexUtil.isCharacterSet(minus)) {
-                        return (SExpression) RegexUtil.create("/" + RegexUtil.setAsString(plus, minus) + "/", it.location)
-                    }
-                }
-                return it;
-            };
-        }
         removeUnusedTermDefinitions();
     }
 

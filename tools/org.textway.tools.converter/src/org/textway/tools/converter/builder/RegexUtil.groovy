@@ -104,6 +104,24 @@ class RegexUtil {
         } else if (expr instanceof SRegexp) {
             sb.append(expr.text[1..-2]);
 
+        } else if( expr instanceof SSetDiff) {
+            if(isCharacterSet(((SSetDiff)expr).left) && isCharacterSet(((SSetDiff)expr).right)) {
+                def left = ((SSetDiff)expr).left instanceof SChoice ? ((SChoice)((SSetDiff)expr).left).elements : [((SSetDiff)expr).left];
+                def right = ((SSetDiff)expr).right instanceof SChoice ? ((SChoice)((SSetDiff)expr).right).elements : [((SSetDiff)expr).right];
+                sb.append(setAsString(left, right));
+                return;
+            }
+            sb.append("<unknown ${expr} >")
+
+        } else if(expr instanceof SLookahead) {
+            sb.append(expr.inverted ? "(?!" : "(?=");
+            def plus = [];
+            if(expr.terms.every {toCharacterSet(it, plus)}) {
+                sb.append(setAsString(plus, []));
+            } else {
+                buildRegexp(SUtil.createChoice(expr.terms, expr.location), sb, deep, true);
+            }
+            sb.append(")")
         } else {
             sb.append("<unknown ${expr} >")
         }
@@ -160,12 +178,27 @@ class RegexUtil {
         }
     }
 
-    static boolean isCharacterSet(List<SExpression> list) {
-        return list.every {it instanceof SCharacter || it instanceof SUnicodeCategory};
+    static boolean isCharacterSet(SExpression e) {
+        if(e instanceof SChoice) {
+            return e.elements.every { isCharacterSet(it) };
+
+        } else if(e instanceof SCharacter || e instanceof SUnicodeCategory) {
+            return true;
+        }
+
+        return false;
     }
 
     static String setAsString(List<SExpression> plus, List<SExpression> minus) {
         StringBuilder sb = new StringBuilder();
+        if(plus.size() == 1 && minus.isEmpty()) {
+            def sym = plus.first();
+            if(sym instanceof SCharacter) {
+                return toRegexp(((SCharacter)sym).c, false);
+            } else if(sym instanceof SUnicodeCategory) {
+                return "\\p{" + ((SUnicodeCategory)sym).name + "}";
+            }
+        }
         if (!plus.isEmpty()) {
             sb.append("[")
             setElementToString(sb, plus);

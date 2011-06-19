@@ -77,6 +77,9 @@ class SWriter {
             if (e.elements.size() < 2) needParens = false;
             return (needParens ? "(" : "") + e.elements.collect { asString(it, true) }.join(" ") + (needParens ? ")" : "");
         } else if (e instanceof SChoice) {
+            if (e.elements == null || e.elements.isEmpty()) {
+                return "[empty]";
+            }
             return (needParens ? "(" : "") + e.elements.collect { asString(it, !(it instanceof SSequence)) }.join(" or ") + (needParens ? ")" : "");
         } else if (e instanceof SCharacter) {
             return charmap.containsKey(e.c) ? "<" + charmap[e.c] + ">" : e.c;
