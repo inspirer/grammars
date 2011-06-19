@@ -220,6 +220,25 @@ class ExpressionUtil {
         return [e];
     }
 
+    private static boolean combineQuantifiersInOr(List<SExpression> list) {
+        boolean tryAgain = true;
+        boolean changed = false;
+        while (tryAgain) {
+            tryAgain = false;
+            def qs = list.findAll { it instanceof SQuantifier && it.min <= 1 && it.max == -1 };
+            for(SQuantifier q : qs) {
+                def good = list.findAll { !(it instanceof SQuantifier) && equals(it, q.inner) }
+                if(!good.isEmpty()) {
+                    list.removeAll(good);
+                    q.min = 0;
+                    changed = tryAgain = true;
+                    break;
+                }
+            }
+        }
+        return changed;
+    }
+
     private static boolean combineQuantifiers(List<SExpression> list) {
         boolean tryAgain = true;
         boolean changed = false;
@@ -317,11 +336,12 @@ class ExpressionUtil {
             if (expr.elements.any {it instanceof SChoice}) {
                 expr.elements = expr.elements.collect { it instanceof SChoice ? it.elements : [it] }.flatten().collect {simplify((SExpression) it)};
             }
+            combineQuantifiersInOr(expr.elements);
             if (expr.elements.size() == 1) return expr.elements.first();
 
             if (expr.elements.any { it instanceof SSequence && (((SSequence) it).elements == null || ((SSequence) it).elements.isEmpty()) }) {
                 expr.elements.removeAll { it instanceof SSequence && (((SSequence) it).elements == null || ((SSequence) it).elements.isEmpty()) };
-                return SUtil.createQuantifier(expr, 0, 1);
+                return simplify(SUtil.createQuantifier(expr, 0, 1));
             }
 
         } else if (expr instanceof SSetDiff) {
