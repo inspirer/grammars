@@ -20,7 +20,7 @@ Comment :: (lexem)
 	/ / /[^\n\r\x2028\x2029]/*
 
 MultiLineCommentChars ::
-	(/[^\*]/* *+ /[^\/\*]/)* (/[^\*]/* *+ or /[^\*]/* * or /[^\*]/*)?
+	(/[^\*]/* *+ /[^\/\*]/)* (/[^\*]/* (*+ or *)?)?
 
 Identifier :: (lexem)
 	IdentifierName but not (break or do or instanceof or typeof or case or else or new or var or catch or finally or return or void or continue or for or switch or while or debugger or function or this or with or default or if or throw or delete or in or try or get or set or class or enum or extends or super or const or export or import or NullLiteral or BooleanLiteral)
@@ -338,7 +338,7 @@ DecimalDigit :: one of
 	6	7	8	9
 
 ExponentPart ::
-	(e or E) (DecimalDigits or + DecimalDigits or - DecimalDigits)
+	(e or E) (+ or -)? DecimalDigits
 
 HexDigit :: one of
 	0	1	2	3	4	5

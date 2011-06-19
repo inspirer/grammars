@@ -220,14 +220,15 @@ class ExpressionUtil {
         return [e];
     }
 
-    private static void combineQuantifiers(SSequence expr) {
+    private static boolean combineQuantifiers(List<SExpression> list) {
         boolean tryAgain = true;
+        boolean changed = false;
         while (tryAgain) {
             tryAgain = false;
             int indexToDelete = -1;
-            for (int i: 1..<expr.elements.size()) {
-                SExpression prev = expr.elements[i - 1];
-                SExpression curr = expr.elements[i];
+            for (int i: 1..<list.size()) {
+                SExpression prev = list[i - 1];
+                SExpression curr = list[i];
                 if (curr instanceof SQuantifier && equals(((SQuantifier) curr).inner, prev)) {
                     indexToDelete = i - 1;
                     curr.min++;
@@ -244,10 +245,11 @@ class ExpressionUtil {
                 }
             }
             if (indexToDelete >= 0) {
-                tryAgain = true;
-                expr.elements.remove(indexToDelete);
+                changed = tryAgain = true;
+                list.remove(indexToDelete);
             }
         }
+        return changed;
     }
 
     private static List<SExpression> extractCommonPrefixOrSuffix(List<SExpression> list, boolean prefix) {
@@ -257,36 +259,45 @@ class ExpressionUtil {
         boolean tryAgain = true;
         while (tryAgain) {
             tryAgain = false;
-            if (list.any { ((SSequence) it).elements.isEmpty() }) break;
-            def firsts = prefix ? list.collect {((SSequence) it).elements.first()} : list.collect {((SSequence) it).elements.last()};
+            if (list.any { it instanceof SSequence && ((SSequence) it).elements.isEmpty() }) break;
+            def firsts = prefix ?
+                list.collect {it instanceof SSequence ? ((SSequence) it).elements.first() : unwrap(it)} :
+                list.collect {it instanceof SSequence ? ((SSequence) it).elements.last() : unwrap(it)};
             if (allEquals(firsts)) {
                 tryAgain = true;
                 result.add(firsts.first());
+                for (int i: 0..<list.size()) {
+                    if (!(list[i] instanceof SSequence)) {
+                        list[i] = SUtil.createSequence([list[i]], list[i].location);
+                    }
+                }
                 list.each {((SSequence) it).elements.remove(prefix ? 0 : ((SSequence) it).elements.size() - 1)};
             }
         }
         return result;
     }
 
-    private static void extractCommonParts(SSequence expr) {
+    private static boolean extractCommonParts(List<SExpression> elements) {
         boolean tryAgain = true;
+        boolean changed = false;
         while (tryAgain) {
             tryAgain = false;
-            for (SChoice c: (List) expr.elements.findAll { it instanceof SChoice && it.elements.every {it instanceof SSequence} }) {
+            for (SChoice c: (List) elements.findAll { it instanceof SChoice }) {
                 List<SExpression> common = extractCommonPrefixOrSuffix(c.elements, true);
                 if (common.size() > 0) {
-                    expr.elements.addAll(expr.elements.indexOf(c), common);
-                    tryAgain = true;
+                    elements.addAll(elements.indexOf(c), common);
+                    changed = tryAgain = true;
                     break;
                 }
                 common = extractCommonPrefixOrSuffix(c.elements, false);
                 if (common.size() > 0) {
-                    expr.elements.addAll(expr.elements.indexOf(c) + 1, common);
-                    tryAgain = true;
+                    elements.addAll(elements.indexOf(c) + 1, common);
+                    changed = tryAgain = true;
                     break;
                 }
             }
         }
+        return changed;
     }
 
     static SExpression simplify(SExpression expr) {
@@ -297,10 +308,8 @@ class ExpressionUtil {
             if (expr.elements.any {it instanceof SSequence}) {
                 expr.elements = expr.elements.collect { it instanceof SSequence ? it.elements : [it] }.flatten().collect {simplify((SExpression) it)};
             }
+            if(combineQuantifiers(expr.elements) || extractCommonParts(expr.elements)) return simplify(expr);
             if (expr.elements.size() == 1) return expr.elements.first();
-            combineQuantifiers(expr)
-            if (expr.elements.size() == 1) return expr.elements.first();
-            extractCommonParts(expr);
         } else if (expr instanceof SChoice) {
             for (int i: 0..<expr.elements.size()) {
                 expr.elements[i] = simplify(expr.elements[i])
@@ -309,14 +318,34 @@ class ExpressionUtil {
                 expr.elements = expr.elements.collect { it instanceof SChoice ? it.elements : [it] }.flatten().collect {simplify((SExpression) it)};
             }
             if (expr.elements.size() == 1) return expr.elements.first();
+
+            if (expr.elements.any { it instanceof SSequence && (((SSequence) it).elements == null || ((SSequence) it).elements.isEmpty()) }) {
+                expr.elements.removeAll { it instanceof SSequence && (((SSequence) it).elements == null || ((SSequence) it).elements.isEmpty()) };
+                return SUtil.createQuantifier(expr, 0, 1);
+            }
+
         } else if (expr instanceof SSetDiff) {
             expr.left = simplify(expr.left);
             expr.right = simplify(expr.right);
         } else if (expr instanceof SQuantifier) {
+            expr.inner = simplify(expr.inner);
             if (expr.min == 1 && expr.max == 1) {
                 return expr.inner;
             }
-            expr.inner = simplify(expr.inner);
+
+            if (expr.inner instanceof SQuantifier) {
+                expr.min *= ((SQuantifier) expr.inner).min;
+                if (expr.max != -1) {
+                    expr.max = ((SQuantifier) expr.inner).max == -1 ? -1 : expr.max * ((SQuantifier) expr.inner).max;
+                }
+                expr.inner = ((SQuantifier) expr.inner).inner;
+            }
+
+            def list = [expr.inner];
+            extractCommonParts(list);
+            if (list.size() > 1) {
+                expr.inner = simplify(SUtil.createSequence(list, expr.location));
+            }
         }
         return expr;
     }
