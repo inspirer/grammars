@@ -103,7 +103,7 @@ kw_while: /while/
 
 # 3.10.1 Integer Literals
 
-IntegerLiteral: /0|[1-9](_*{Digits})?[lL]?/
+IntegerLiteral: /(0|[1-9](_*{Digits})?)[lL]?/
 IntegerLiteral: /{HexNumeral}[lL]?/
 IntegerLiteral: /0_*{OctalDigits}[lL]?/
 IntegerLiteral: /0[bB]{BinaryDigits}[lL]?/
