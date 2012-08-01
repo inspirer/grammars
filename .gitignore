@@ -3,4 +3,6 @@
 /tools/.idea/dictionaries
 /tools/build/
 /tools/libs/
+/java/out
+/java/.idea/workspace.xml
 bin

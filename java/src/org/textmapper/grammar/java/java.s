@@ -4,6 +4,7 @@
 #lang = "last"
 lang = "java"
 prefix = "Java"
+package = "org.textmapper.grammar.java"
 positions = "line,offset"
 endpositions = "offset"
 
