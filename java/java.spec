@@ -229,7 +229,7 @@ VariableModifier:
 
 FormalParameterDeclsRest:
 	VariableDeclaratorId [ ',' FormalParameterDecls ]
-	'...' VariableDeclaratorId
+	'.' '.' '.' VariableDeclaratorId
 
 VariableDeclaratorId:
 	Identifier {'[' ']'}
