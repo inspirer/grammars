@@ -4,7 +4,6 @@
 #lang = "last"
 lang = "java"
 prefix = "Java"
-gentree = true
 positions = "line,offset"
 endpositions = "offset"
 
@@ -142,7 +141,8 @@ HexSignificand = /{HexNumeral}\.?|0[xX]{HexDigits}?\.{HexDigits}/
 
 # 3.10.3. Boolean Literals
 
-BooleanLiteral: /true|false/
+BooleanLiteral: /true/
+BooleanLiteral: /false/
 
 # 3.10.4-6 String Literals
 
