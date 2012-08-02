@@ -20,26 +20,7 @@ WhiteSpace: /[\r\n\t\f\x20]|\r\n/	(space)
 
 EndOfLineComment: /\/\/[^\r\n]*/ (space)
 
-# TODO
-#TraditionalComment: /\/\*/
-#    / * CommentTail
-#
-#CommentTail:
-#    * CommentTailStar
-#    NotStar CommentTail
-#
-#CommentTailStar:
-#    /
-#    * CommentTailStar
-#    NotStarNotSlash CommentTail
-#
-#NotStar:
-#    InputCharacter but not *
-#    LineTerminator
-#
-#NotStarNotSlash:
-#    InputCharacter but not * or /
-#    LineTerminator
+TraditionalComment: /\/\*([^*]|\*+[^\/*])*\*+\// (space)
 
 # 3.8 Identifiers
 

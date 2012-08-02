@@ -13,7 +13,6 @@ import static org.textmapper.grammar.java.JavaLexer.*;
  */
 public class JavaLexerTest {
 
-
     @Test
     public void testIdentifiers() {
         assertJava(" String    ", Lexems.Identifier);
@@ -142,6 +141,18 @@ public class JavaLexerTest {
     }
 
     @Test
+    public void testComments() {
+        assertComment("x//asdad\n    \ny",
+                Lexems.Identifier, Lexems.EndOfLineComment, Lexems.Identifier);
+
+        assertComment("  /**/   ",
+                Lexems.TraditionalComment);
+
+        assertComment("x /* this comment /* // /** ends here: */ y",
+                Lexems.Identifier, Lexems.TraditionalComment, Lexems.Identifier);
+    }
+
+    @Test
     public void testSeparators() {
         assertJava(" (    )    {    }    [    ]    ;    ,    . ",
                 Lexems.LPAREN, Lexems.RPAREN, Lexems.LCURLY, Lexems.RCURLY, Lexems.LSQUARE, Lexems.RSQUARE,
@@ -172,6 +183,37 @@ public class JavaLexerTest {
     private void assertJava(String text, int... lexems) {
         try {
             JavaLexer javaLexer = new JavaLexer(new StringReader(text), testReporter());
+            LapgSymbol next;
+            int index = 0;
+            while ((next = javaLexer.next()).lexem != Lexems.eoi) {
+                if (lexems.length == index) {
+                    fail("unexpected lexem after eoi: " + next.lexem + "(" + text.substring(next.offset, next.endoffset) + ")");
+                }
+                if (lexems[index] != next.lexem) {
+                    fail(next.line + ": got " + next.lexem + "(" + text.substring(next.offset, next.endoffset) + ") instead of " + lexems[index]);
+                }
+                index++;
+            }
+            if (index < lexems.length) {
+                fail("expected lexem: " + lexems[index]);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("IOException: " + e.getMessage());
+        }
+    }
+
+    private void assertComment(String text, int... lexems) {
+        try {
+            JavaLexer javaLexer = new JavaLexer(new StringReader(text), testReporter()) {
+                @Override
+                protected boolean createToken(LapgSymbol lapg_n, int lexemIndex) throws IOException {
+                    if (lexemIndex == Lexems.EndOfLineComment || lexemIndex == Lexems.TraditionalComment) {
+                        return true;
+                    }
+                    return super.createToken(lapg_n, lexemIndex);
+                }
+            };
             LapgSymbol next;
             int index = 0;
             while ((next = javaLexer.next()).lexem != Lexems.eoi) {
