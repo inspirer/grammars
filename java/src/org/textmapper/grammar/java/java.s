@@ -45,8 +45,8 @@ EndOfLineComment: /\/\/[^\r\n]*/ (space)
 
 Identifier: /{JavaLetter}{JavaLetterOrDigit}*/  (class)
 
-JavaLetter = /[a-zA-Z_$\p{L}\p{Nl}]/
-JavaLetterOrDigit = /[a-zA-Z0-9_$\p{L}\p{Nl}\p{Nd}]/
+JavaLetter = /[a-zA-Z_$\p{L}\p{Nl}]|{UnicodeEscape}/
+JavaLetterOrDigit = /[a-zA-Z0-9_$\p{L}\p{Nl}\p{Nd}]|{UnicodeEscape}/
 
 # 3.9 Keywords
 
@@ -150,9 +150,11 @@ BooleanLiteral: /false/
 EscapeSequence = /\\[btnfr"'\\]|{OctalEscape}/
 OctalEscape = /\\([0-3]?[0-7])?[0-7]/
 
-CharacterLiteral: /'([^\r\n'\\]|{EscapeSequence})'/
+CharacterLiteral: /'([^\r\n'\\]|{EscapeSequence}|{UnicodeEscape})'/
 
-StringLiteral: /"([^\r\n"\\]|{EscapeSequence})*"/
+StringLiteral: /"([^\r\n"\\]|{EscapeSequence}|{UnicodeEscape})*"/
+
+UnicodeEscape = /\\u+{HexDigit}{4}/
 
 # 3.10.7. The Null Literal
 

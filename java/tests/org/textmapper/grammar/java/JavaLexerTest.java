@@ -21,6 +21,7 @@ public class JavaLexerTest {
         assertJava(/* In greek */"\u03b1\u03c1\u03b5\u03c4\u03b7", Lexems.Identifier);
         assertJava("MAX_VALUE", Lexems.Identifier);
         assertJava("isLetterOrDigit", Lexems.Identifier);
+        assertJava("is\\u00aa", Lexems.Identifier);
     }
 
     @Test
@@ -111,6 +112,62 @@ public class JavaLexerTest {
         assertJava("1e137", Lexems.FloatingPointLiteral);
     }
 
+    @Test
+    public void testChars() {
+        assertJava("'a'", Lexems.CharacterLiteral);
+        assertJava("'%'", Lexems.CharacterLiteral);
+        assertJava("'\\t'", Lexems.CharacterLiteral);
+        assertJava("'\\\\'", Lexems.CharacterLiteral);
+        assertJava("'\\''", Lexems.CharacterLiteral);
+        assertJava("'\\u03a9'", Lexems.CharacterLiteral);
+        assertJava("'\\uFFFF'", Lexems.CharacterLiteral);
+        assertJava("'\\177'", Lexems.CharacterLiteral);
+        assertJava("'\u03a9'", Lexems.CharacterLiteral);
+        assertJava("'\u2297'", Lexems.CharacterLiteral);
+    }
+
+    @Test
+    public void testStrings() {
+        assertJava("\"\"", Lexems.StringLiteral);
+        assertJava("\"\\\"\"", Lexems.StringLiteral);
+        assertJava("\"This is a string\"", Lexems.StringLiteral);
+        assertJava("\"\\n\"", Lexems.StringLiteral);
+    }
+
+    @Test
+    public void testBooleanAndNull() {
+        assertJava("null", Lexems.NullLiteral);
+        assertJava("true", Lexems.BooleanLiteral);
+        assertJava("false", Lexems.BooleanLiteral);
+    }
+
+    @Test
+    public void testSeparators() {
+        assertJava(" (    )    {    }    [    ]    ;    ,    . ",
+                Lexems.LPAREN, Lexems.RPAREN, Lexems.LCURLY, Lexems.RCURLY, Lexems.LSQUARE, Lexems.RSQUARE,
+                Lexems.SEMICOLON, Lexems.COMMA, Lexems.DOT);
+    }
+
+    @Test
+    public void testOperators() {
+        assertJava("=   >   <   !   ~   ?   :",
+                Lexems.EQUAL, Lexems.GREATER, Lexems.LESS, Lexems.EXCLAMATION, Lexems.TILDE,
+                Lexems.QUESTIONMARK, Lexems.COLON);
+
+        assertJava("==  <=  >=  !=  &&  ||  ++  --",
+                Lexems.EQUALEQUAL, Lexems.LESSEQUAL, Lexems.GREATEREQUAL, Lexems.EXCLAMATIONEQUAL,
+                Lexems.AMPERSANDAMPERSAND, Lexems.OROR, Lexems.PLUSPLUS, Lexems.MINUSMINUS);
+
+        assertJava("+   -   *   /   &   |   ^   %   <<   >>   >>>",
+                Lexems.PLUS, Lexems.MINUS, Lexems.MULT, Lexems.SLASH,
+                Lexems.AMPERSAND, Lexems.OR, Lexems.XOR, Lexems.PERCENT,
+                Lexems.LESSLESS, Lexems.GREATERGREATER, Lexems.GREATERGREATERGREATER);
+
+        assertJava("+=  -=  *=  /=  &=  |=  ^=  %=  <<=  >>=  >>>=",
+                Lexems.PLUSEQUAL, Lexems.MINUSEQUAL, Lexems.MULTEQUAL, Lexems.SLASHEQUAL,
+                Lexems.AMPERSANDEQUAL, Lexems.OREQUAL, Lexems.XOREQUAL, Lexems.PERCENTEQUAL,
+                Lexems.LESSLESSEQUAL, Lexems.GREATERGREATEREQUAL, Lexems.GREATERGREATERGREATEREQUAL);
+    }
 
     private void assertJava(String text, int... lexems) {
         try {
