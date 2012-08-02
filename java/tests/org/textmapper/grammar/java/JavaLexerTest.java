@@ -96,17 +96,17 @@ public class JavaLexerTest {
     @Test
     public void testFloat() {
         assertJava("1e1f", Lexems.FloatingPointLiteral);
-//        assertJava("2.f", Lexems.FloatingPointLiteral);
-//        assertJava(".3f", Lexems.FloatingPointLiteral);
+        assertJava("2.f", Lexems.FloatingPointLiteral);
+        assertJava(".3f", Lexems.FloatingPointLiteral);
         assertJava("0f", Lexems.FloatingPointLiteral);
-//        assertJava("3.14f", Lexems.FloatingPointLiteral);
-//        assertJava("6.022137e+23f", Lexems.FloatingPointLiteral);
+        assertJava("3.14f", Lexems.FloatingPointLiteral);
+        assertJava("6.022137e+23f", Lexems.FloatingPointLiteral);
 
         assertJava("1e1", Lexems.FloatingPointLiteral);
-//        assertJava("2.", Lexems.FloatingPointLiteral);
-//        assertJava(".3", Lexems.FloatingPointLiteral);
-//        assertJava("0.0", Lexems.FloatingPointLiteral);
-//        assertJava("3.14", Lexems.FloatingPointLiteral);
+        assertJava("2.", Lexems.FloatingPointLiteral);
+        assertJava(".3", Lexems.FloatingPointLiteral);
+        assertJava("0.0", Lexems.FloatingPointLiteral);
+        assertJava("3.14", Lexems.FloatingPointLiteral);
         assertJava("1e-9d", Lexems.FloatingPointLiteral);
         assertJava("1e137", Lexems.FloatingPointLiteral);
     }
