@@ -18,6 +18,54 @@ import static org.junit.Assert.fail;
 public class JavaParserTest {
 
     @Test
+    public void testAnno() throws Exception {
+        AstNode tree = parse(
+                "package java.lang.annotation;\n" +
+                        "@Documented\n" +
+                        "@Retention(RetentionPolicy.RUNTIME)\n" +
+                        "@Target(ElementType.ANNOTATION_TYPE)\n" +
+                        "public @interface Retention {\n" +
+                        "   RetentionPolicy value();\n" +
+                        "}\n");
+        assertTree(
+                "CompilationUnit\n" +
+                        "  PackageDeclaration\n" +
+                        "    kw_package\n" +
+                        "    QualifiedIdentifier\n" +
+                        "      'java' '.' 'lang' '.' 'annotation'\n" +
+                        "    ';'\n" +
+                        "  AnnotationTypeDeclaration\n" +
+                        "    Modifiers\n" +
+                        "      Annotation\n" +
+                        "        '@' 'Documented'\n" +
+                        "      Annotation\n" +
+                        "        '@'\n" +
+                        "        'Retention'\n" +
+                        "        '('\n" +
+                        "        QualifiedIdentifier\n" +
+                        "          'RetentionPolicy' '.' 'RUNTIME'\n" +
+                        "        ')'\n" +
+                        "      Annotation\n" +
+                        "        '@'\n" +
+                        "        'Target'\n" +
+                        "        '('\n" +
+                        "        QualifiedIdentifier\n" +
+                        "          'ElementType' '.' 'ANNOTATION_TYPE'\n" +
+                        "        ')'\n" +
+                        "      kw_public\n" +
+                        "    '@'\n" +
+                        "    kw_interface\n" +
+                        "    'Retention'\n" +
+                        "    AnnotationTypeBody\n" +
+                        "      '{'\n" +
+                        "      AnnotationTypeMemberDeclaration_optlist\n" +
+                        "        AnnotationTypeMemberDeclaration\n" +
+                        "          'RetentionPolicy' 'value' '(' ')' ';'\n" +
+                        "      '}'", tree);
+    }
+
+
+    @Test
     public void testTripleGenerics1() throws Exception {
         AstNode tree = parse(
                 "class MapNested<T extends List<Map<Integer,Integer>>> { \n" +
@@ -99,7 +147,7 @@ public class JavaParserTest {
                         "        'T' '>'\n" +
                         "    InterfaceBody\n" +
                         "      '{'\n" +
-                        "      InterfaceMemberDeclaration_list\n" +
+                        "      InterfaceMemberDeclaration_optlist\n" +
                         "        AbstractMethodDeclaration\n" +
                         "          MethodHeader\n" +
                         "            'T' 'convert' '(' ')'\n" +
@@ -237,6 +285,173 @@ public class JavaParserTest {
                         "        '}'\n" +
                         "    '}'", tree);
 
+    }
+
+    @Test
+    public void testCast1() throws Exception {
+        AstNode tree = parse(
+                "class A {\n" +
+                        "        static final int q = 44;\n" +
+                        "        int f = ((int)A.q); }");
+        assertTree("ClassDeclaration\n" +
+                "  kw_class\n" +
+                "  'A'\n" +
+                "  ClassBody\n" +
+                "    '{'\n" +
+                "    ClassBodyDeclarations\n" +
+                "      FieldDeclaration\n" +
+                "        Modifiers\n" +
+                "          kw_static kw_final\n" +
+                "        kw_int\n" +
+                "        VariableDeclarator\n" +
+                "          VariableDeclaratorId\n" +
+                "            'q'\n" +
+                "          '='\n" +
+                "          IntegerLiteral\n" +
+                "        ';'\n" +
+                "      FieldDeclaration\n" +
+                "        kw_int\n" +
+                "        VariableDeclarator\n" +
+                "          VariableDeclaratorId\n" +
+                "            'f'\n" +
+                "          '='\n" +
+                "          PrimaryNoNewArray\n" +
+                "            '('\n" +
+                "            CastExpression\n" +
+                "              '('\n" +
+                "              kw_int\n" +
+                "              ')'\n" +
+                "              QualifiedIdentifier\n" +
+                "                'A' '.' 'q'\n" +
+                "            ')'\n" +
+                "        ';'\n" +
+                "    '}'", tree);
+    }
+
+    @Test
+    public void testExpr1() throws Exception {
+        AstNode tree = parse(
+                "class A {\n" +
+                        "        static final int q = 44;\n" +
+                        "        int f = (A.q); }");
+        assertTree("ClassDeclaration\n" +
+                "  kw_class\n" +
+                "  'A'\n" +
+                "  ClassBody\n" +
+                "    '{'\n" +
+                "    ClassBodyDeclarations\n" +
+                "      FieldDeclaration\n" +
+                "        Modifiers\n" +
+                "          kw_static kw_final\n" +
+                "        kw_int\n" +
+                "        VariableDeclarator\n" +
+                "          VariableDeclaratorId\n" +
+                "            'q'\n" +
+                "          '='\n" +
+                "          IntegerLiteral\n" +
+                "        ';'\n" +
+                "      FieldDeclaration\n" +
+                "        kw_int\n" +
+                "        VariableDeclarator\n" +
+                "          VariableDeclaratorId\n" +
+                "            'f'\n" +
+                "          '='\n" +
+                "          PrimaryNoNewArray\n" +
+                "            '('\n" +
+                "            QualifiedIdentifier\n" +
+                "              'A' '.' 'q'\n" +
+                "            ')'\n" +
+                "        ';'\n" +
+                "    '}'", tree);
+    }
+
+    @Test
+    public void testExpr2() throws Exception {
+        AstNode tree = parse(
+                "    class A {\n" +
+                        "        static final boolean q = 1 + 2 << 3 < 4 + 4 * 5 / 6;\n" +
+                        "        int f = (A.q?1:(3) + 3*((A[])(null))[1].f + (this instanceof A ?1:0));\n" +
+                        "    }\n");
+        assertTree("ClassDeclaration\n" +
+                "  kw_class\n" +
+                "  'A'\n" +
+                "  ClassBody\n" +
+                "    '{'\n" +
+                "    ClassBodyDeclarations\n" +
+                "      FieldDeclaration\n" +
+                "        Modifiers\n" +
+                "          kw_static kw_final\n" +
+                "        kw_boolean\n" +
+                "        VariableDeclarator\n" +
+                "          VariableDeclaratorId\n" +
+                "            'q'\n" +
+                "          '='\n" +
+                "          RelationalExpression\n" +
+                "            ShiftExpression\n" +
+                "              AdditiveExpression\n" +
+                "                IntegerLiteral '+' IntegerLiteral\n" +
+                "              '<<'\n" +
+                "              IntegerLiteral\n" +
+                "            '<'\n" +
+                "            AdditiveExpression\n" +
+                "              IntegerLiteral\n" +
+                "              '+'\n" +
+                "              MultiplicativeExpression\n" +
+                "                IntegerLiteral '*' IntegerLiteral '/' IntegerLiteral\n" +
+                "        ';'\n" +
+                "      FieldDeclaration\n" +
+                "        kw_int\n" +
+                "        VariableDeclarator\n" +
+                "          VariableDeclaratorId\n" +
+                "            'f'\n" +
+                "          '='\n" +
+                "          PrimaryNoNewArray\n" +
+                "            '('\n" +
+                "            ConditionalExpression_NotName\n" +
+                "              QualifiedIdentifier\n" +
+                "                'A' '.' 'q'\n" +
+                "              '?'\n" +
+                "              IntegerLiteral\n" +
+                "              ':'\n" +
+                "              AdditiveExpression\n" +
+                "                PrimaryNoNewArray\n" +
+                "                  '(' IntegerLiteral ')'\n" +
+                "                '+'\n" +
+                "                MultiplicativeExpression\n" +
+                "                  IntegerLiteral\n" +
+                "                  '*'\n" +
+                "                  FieldAccess\n" +
+                "                    ArrayAccess\n" +
+                "                      PrimaryNoNewArray\n" +
+                "                        '('\n" +
+                "                        CastExpression\n" +
+                "                          '('\n" +
+                "                          'A'\n" +
+                "                          Dims$1\n" +
+                "                            '[' ']'\n" +
+                "                          ')'\n" +
+                "                          PrimaryNoNewArray\n" +
+                "                            '(' NullLiteral ')'\n" +
+                "                        ')'\n" +
+                "                      '['\n" +
+                "                      IntegerLiteral\n" +
+                "                      ']'\n" +
+                "                    '.'\n" +
+                "                    'f'\n" +
+                "                '+'\n" +
+                "                PrimaryNoNewArray\n" +
+                "                  '('\n" +
+                "                  ConditionalExpression_NotName\n" +
+                "                    InstanceofExpression_NotName\n" +
+                "                      kw_this kw_instanceof 'A'\n" +
+                "                    '?'\n" +
+                "                    IntegerLiteral\n" +
+                "                    ':'\n" +
+                "                    IntegerLiteral\n" +
+                "                  ')'\n" +
+                "            ')'\n" +
+                "        ';'\n" +
+                "    '}'", tree);
     }
 
     private void assertTree(String expected, AstNode actual) {
