@@ -195,7 +195,7 @@ NullLiteral: /null/
 '>>>=': />>>=/
 '@': /@/
 
-%input CompilationUnit, MethodBody, GenericMethodDeclaration, ClassBodyDeclarations, Expression, Statement;
+%input CompilationUnit, MethodBody, GenericMethodDeclaration, ClassBodyDeclaration, Expression, Statement;
 
 QualifiedIdentifier ::=
 	  Identifier
@@ -220,16 +220,16 @@ TypeDeclaration ::=
 ;
 
 ClassDeclaration ::=
-	  Modifiersopt kw_class Identifier TypeParameters? (kw_extends ClassType)? (kw_implements InterfaceTypeList)? ClassBody ;
+	  Modifiersopt kw_class Identifier TypeParameters? (kw_extends ClassType)? (kw_implements (InterfaceType separator ',')+)? ClassBody ;
 
 EnumDeclaration ::=
-	  Modifiersopt kw_enum Identifier TypeParameters? (kw_implements InterfaceTypeList)? EnumBody ;
+	  Modifiersopt kw_enum Identifier TypeParameters? (kw_implements (InterfaceType separator ',')+)? EnumBody ;
 
 InterfaceDeclaration ::=
-	  Modifiersopt kw_interface Identifier TypeParameters? (kw_extends InterfaceTypeList)? InterfaceBody ;
+	  Modifiersopt kw_interface Identifier TypeParameters? (kw_extends (InterfaceType separator ',')+)? InterfaceBody ;
 
 AnnotationTypeDeclaration ::=
-	  Modifiers? '@' kw_interface Identifier TypeParameters? (kw_extends ClassType)? (kw_implements InterfaceTypeList)? AnnotationTypeBody ;
+	  Modifiers? '@' kw_interface Identifier TypeParameters? (kw_extends ClassType)? (kw_implements (InterfaceType separator ',')+)? AnnotationTypeBody ;
 
 Literal ::=
 	  IntegerLiteral
@@ -277,13 +277,10 @@ GenericType ::=
 	| ClassOrInterface '<' '>'
 ;
 
-ArrayTypeWithTypeArgumentsName ::=
-	  GenericType '.' QualifiedIdentifier ;
-
 ArrayType ::=
 	  PrimitiveType Dims
 	| QualifiedIdentifier Dims
-	| ArrayTypeWithTypeArgumentsName Dims
+	| GenericType '.' QualifiedIdentifier Dims
 	| GenericType Dims
 ;
 
@@ -310,21 +307,11 @@ Modifier ::=
 	| Annotation
 ;
 
-InterfaceTypeList ::=
-	  InterfaceType
-	| InterfaceTypeList ',' InterfaceType
-;
-
 InterfaceType ::=
 	  ClassOrInterfaceType ;
 
 ClassBody ::=
-	  '{' ClassBodyDeclarationsopt '}' ;
-
-ClassBodyDeclarations ::=
-	  ClassBodyDeclaration
-	| ClassBodyDeclarations ClassBodyDeclaration
-;
+	  '{' ClassBodyDeclaration* '}' ;
 
 ClassBodyDeclaration ::=
 	  ClassMemberDeclaration
@@ -332,9 +319,6 @@ ClassBodyDeclaration ::=
 	| ConstructorDeclaration
 	| Block
 ;
-
-Initializer ::=
-	  Block ;
 
 ClassMemberDeclaration ::=
 	  FieldDeclaration
@@ -400,16 +384,10 @@ StaticInitializer ::=
 	  kw_static Block ;
 
 ConstructorDeclaration ::=
-	  ConstructorHeader MethodBody
-	| ConstructorHeader ';'
-;
-
-ConstructorHeader ::=
-	  Modifiersopt TypeParameters? Identifier '(' (FormalParameter separator ',')* ')' MethodHeaderThrowsClauseopt ;
+	  Modifiersopt TypeParameters? Identifier '(' (FormalParameter separator ',')* ')' MethodHeaderThrowsClauseopt (MethodBody | ';') ;
 
 ExplicitConstructorInvocation ::=
-	  ExplicitConstructorId '(' ArgumentListopt ')' ';'
-;
+	  ExplicitConstructorId '(' (Expression separator ',')* ')' ';' ;
 
 ExplicitConstructorId ::=
 	  (Primary '.')? TypeArguments? ThisOrSuper
@@ -581,8 +559,7 @@ Primary ::=
 PrimaryNoNewArray ::=
 	  Literal
 	| kw_this
-	| '(' Expression_NotName ')'
-	| '(' QualifiedIdentifier ')'
+	| ParenthesizedExpression
 	| ClassInstanceCreationExpression
 	| FieldAccess
 	| QualifiedIdentifier '.' ThisOrSuper
@@ -592,29 +569,24 @@ PrimaryNoNewArray ::=
 	| ArrayAccess
 ;
 
-ClassInstanceCreationExpression ::=
-	  (Primary '.')? kw_new TypeArguments? ClassType '(' ArgumentListopt ')' ClassBodyopt
-	| QualifiedIdentifier '.' kw_new TypeArguments? ClassType '(' ArgumentListopt ')' ClassBodyopt
+ParenthesizedExpression ::=
+	  '(' ExpressionNotName ')'
+	| '(' QualifiedIdentifier ')'
 ;
 
-ArgumentList ::=
-	  Expression
-	| ArgumentList ',' Expression
+ClassInstanceCreationExpression ::=
+	  (Primary '.')? kw_new TypeArguments? ClassType '(' (Expression separator ',')* ')' ClassBodyopt
+	| QualifiedIdentifier '.' kw_new TypeArguments? ClassType '(' (Expression separator ',')* ')' ClassBodyopt
 ;
 
 ArrayCreationWithoutArrayInitializer ::=
-	  kw_new PrimitiveType DimWithOrWithOutExprs
-	| kw_new ClassOrInterfaceType DimWithOrWithOutExprs
+	  kw_new PrimitiveType DimWithOrWithOutExpr+
+	| kw_new ClassOrInterfaceType DimWithOrWithOutExpr+
 ;
 
 ArrayCreationWithArrayInitializer ::=
-	  kw_new PrimitiveType DimWithOrWithOutExprs ArrayInitializer
-	| kw_new ClassOrInterfaceType DimWithOrWithOutExprs ArrayInitializer
-;
-
-DimWithOrWithOutExprs ::=
-	  DimWithOrWithOutExpr
-	| DimWithOrWithOutExprs DimWithOrWithOutExpr
+	  kw_new PrimitiveType DimWithOrWithOutExpr+ ArrayInitializer
+	| kw_new ClassOrInterfaceType DimWithOrWithOutExpr+ ArrayInitializer
 ;
 
 DimWithOrWithOutExpr ::=
@@ -629,9 +601,9 @@ FieldAccess ::=
 ;
 
 MethodInvocation ::=
-	  QualifiedIdentifier ('.' TypeArguments Identifier)? '(' ArgumentListopt ')'
-	| Primary '.' TypeArguments? Identifier '(' ArgumentListopt ')'
-	| kw_super '.' TypeArguments? Identifier '(' ArgumentListopt ')'
+	  QualifiedIdentifier ('.' TypeArguments Identifier)? '(' (Expression separator ',')* ')'
+	| Primary '.' TypeArguments? Identifier '(' (Expression separator ',')* ')'
+	| kw_super '.' TypeArguments? Identifier '(' (Expression separator ',')* ')'
 ;
 
 ArrayAccess ::=
@@ -682,73 +654,9 @@ CastExpression ::=
 	| '(' QualifiedIdentifier Dims ')' UnaryExpressionNotPlusMinus
 ;
 
-MultiplicativeExpression ::=
-	  UnaryExpression
-	| MultiplicativeExpression '*' UnaryExpression
-	| MultiplicativeExpression '/' UnaryExpression
-	| MultiplicativeExpression '%' UnaryExpression
-;
-
-AdditiveExpression ::=
-	  MultiplicativeExpression
-	| AdditiveExpression '+' MultiplicativeExpression
-	| AdditiveExpression '-' MultiplicativeExpression
-;
-
-ShiftExpression ::=
-	  AdditiveExpression
-	| ShiftExpression '<<' AdditiveExpression
-	| ShiftExpression '>>' AdditiveExpression
-	| ShiftExpression '>>>' AdditiveExpression
-;
-
-RelationalExpression ::=
-	  ShiftExpression
-	| RelationalExpression '<' ShiftExpression
-	| RelationalExpression '>' ShiftExpression
-	| RelationalExpression '<=' ShiftExpression
-	| RelationalExpression '>=' ShiftExpression
-;
-
-InstanceofExpression ::=
-	  RelationalExpression
-	| InstanceofExpression kw_instanceof ReferenceType
-;
-
-EqualityExpression ::=
-	  InstanceofExpression
-	| EqualityExpression '==' InstanceofExpression
-	| EqualityExpression '!=' InstanceofExpression
-;
-
-AndExpression ::=
-	  EqualityExpression
-	| AndExpression '&' EqualityExpression
-;
-
-ExclusiveOrExpression ::=
-	  AndExpression
-	| ExclusiveOrExpression '^' AndExpression
-;
-
-InclusiveOrExpression ::=
-	  ExclusiveOrExpression
-	| InclusiveOrExpression '|' ExclusiveOrExpression
-;
-
-ConditionalAndExpression ::=
-	  InclusiveOrExpression
-	| ConditionalAndExpression '&&' InclusiveOrExpression
-;
-
-ConditionalOrExpression ::=
-	  ConditionalAndExpression
-	| ConditionalOrExpression '||' ConditionalAndExpression
-;
-
 ConditionalExpression ::=
-	  ConditionalOrExpression
-	| ConditionalOrExpression '?' Expression ':' ConditionalExpression
+	  ConditionalExpressionNotName
+	| QualifiedIdentifier
 ;
 
 AssignmentExpression ::=
@@ -756,8 +664,14 @@ AssignmentExpression ::=
 	| Assignment
 ;
 
+LValue ::=
+ 	  ArrayAccess
+ 	| FieldAccess
+ 	| QualifiedIdentifier
+;
+
 Assignment ::=
-	  PostfixExpression AssignmentOperator AssignmentExpression ;
+	  LValue AssignmentOperator AssignmentExpression ;
 
 AssignmentOperator ::=
 	  '='
@@ -781,10 +695,10 @@ ConstantExpression ::=
 	  Expression ;
 
 EnumBody ::=
-	  '{' (EnumConstant separator ',')+? ','? (';' ClassBodyDeclarationsopt)? '}' ;
+	  '{' (EnumConstant separator ',')+? ','? (';' ClassBodyDeclaration*)? '}' ;
 
 EnumConstant ::=
-	  Modifiersopt Identifier ('(' ArgumentListopt ')')? ClassBodyopt ;
+	  Modifiersopt Identifier ('(' (Expression separator ',')* ')')? ClassBodyopt ;
 
 TypeArguments ::=
 	  '<' TypeArgumentList '>'
@@ -864,103 +778,74 @@ UnaryExpressionNotPlusMinus_NotName ::=
 	| CastExpression
 ;
 
-MultiplicativeExpression_NotName ::=
+%left '||';
+%left '&&';
+%left '|';
+%left '^';
+%left '&';
+%left '==' '!=';
+%nonassoc '>' '<' '>=' '<=' kw_instanceof;
+%left '<<' '>>' '>>>';
+%left '+' '-';
+%left '*' '/' '%';
+
+ArithmeticExpressionNotName ::=
 	  UnaryExpression_NotName
-	| MultiplicativeExpression_NotName '*' UnaryExpression
-	| QualifiedIdentifier '*' UnaryExpression
-	| MultiplicativeExpression_NotName '/' UnaryExpression
-	| QualifiedIdentifier '/' UnaryExpression
-	| MultiplicativeExpression_NotName '%' UnaryExpression
-	| QualifiedIdentifier '%' UnaryExpression
+	| ArithmeticPart '*' ArithmeticPart
+	| ArithmeticPart '/' ArithmeticPart
+	| ArithmeticPart '%' ArithmeticPart
+	| ArithmeticPart '+' ArithmeticPart
+	| ArithmeticPart '-' ArithmeticPart
+	| ArithmeticPart '<<' ArithmeticPart
+	| ArithmeticPart '>>' ArithmeticPart
+	| ArithmeticPart '>>>' ArithmeticPart
 ;
 
-AdditiveExpression_NotName ::=
-	  MultiplicativeExpression_NotName
-	| AdditiveExpression_NotName '+' MultiplicativeExpression
-	| QualifiedIdentifier '+' MultiplicativeExpression
-	| AdditiveExpression_NotName '-' MultiplicativeExpression
-	| QualifiedIdentifier '-' MultiplicativeExpression
+ArithmeticPart ::=
+	  ArithmeticExpressionNotName
+	| QualifiedIdentifier
 ;
 
-ShiftExpression_NotName ::=
-	  AdditiveExpression_NotName
-	| ShiftExpression_NotName '<<' AdditiveExpression
-	| QualifiedIdentifier '<<' AdditiveExpression
-	| ShiftExpression_NotName '>>' AdditiveExpression
-	| QualifiedIdentifier '>>' AdditiveExpression
-	| ShiftExpression_NotName '>>>' AdditiveExpression
-	| QualifiedIdentifier '>>>' AdditiveExpression
+RelationalExpressionNotName ::=
+	  ArithmeticExpressionNotName
+	| ArithmeticExpressionNotName '<' ArithmeticPart
+	| QualifiedIdentifier '<' ArithmeticPart
+	| ArithmeticPart '>' ArithmeticPart
+	| ArithmeticPart '<=' ArithmeticPart
+	| ArithmeticPart '>=' ArithmeticPart
+	| ArithmeticPart kw_instanceof ReferenceType
+	| RelationalPart '==' RelationalPart
+	| RelationalPart '!=' RelationalPart
 ;
 
-RelationalExpression_NotName ::=
-	  ShiftExpression_NotName
-	| ShiftExpression_NotName '<' ShiftExpression
-	| QualifiedIdentifier '<' ShiftExpression
-	| ShiftExpression_NotName '>' ShiftExpression
-	| QualifiedIdentifier '>' ShiftExpression
-	| RelationalExpression_NotName '<=' ShiftExpression
-	| QualifiedIdentifier '<=' ShiftExpression
-	| RelationalExpression_NotName '>=' ShiftExpression
-	| QualifiedIdentifier '>=' ShiftExpression
+RelationalPart ::=
+	  RelationalExpressionNotName
+	| QualifiedIdentifier
 ;
 
-InstanceofExpression_NotName ::=
-	  RelationalExpression_NotName
-	| QualifiedIdentifier kw_instanceof ReferenceType
-	| InstanceofExpression_NotName kw_instanceof ReferenceType
+LogicalExpressionNotName ::=
+	  RelationalExpressionNotName
+	| BooleanOrBitwisePart '&' BooleanOrBitwisePart
+	| BooleanOrBitwisePart '^' BooleanOrBitwisePart
+	| BooleanOrBitwisePart '|' BooleanOrBitwisePart
+	| BooleanOrBitwisePart '&&' BooleanOrBitwisePart
+	| BooleanOrBitwisePart '||' BooleanOrBitwisePart
 ;
 
-EqualityExpression_NotName ::=
-	  InstanceofExpression_NotName
-	| EqualityExpression_NotName '==' InstanceofExpression
-	| QualifiedIdentifier '==' InstanceofExpression
-	| EqualityExpression_NotName '!=' InstanceofExpression
-	| QualifiedIdentifier '!=' InstanceofExpression
+BooleanOrBitwisePart ::=
+	  LogicalExpressionNotName
+	| QualifiedIdentifier
 ;
 
-AndExpression_NotName ::=
-	  EqualityExpression_NotName
-	| AndExpression_NotName '&' EqualityExpression
-	| QualifiedIdentifier '&' EqualityExpression
+ConditionalExpressionNotName ::=
+	  LogicalExpressionNotName
+	| BooleanOrBitwisePart '?' Expression ':' ConditionalExpression
 ;
 
-ExclusiveOrExpression_NotName ::=
-	  AndExpression_NotName
-	| ExclusiveOrExpression_NotName '^' AndExpression
-	| QualifiedIdentifier '^' AndExpression
-;
-
-InclusiveOrExpression_NotName ::=
-	  ExclusiveOrExpression_NotName
-	| InclusiveOrExpression_NotName '|' ExclusiveOrExpression
-	| QualifiedIdentifier '|' ExclusiveOrExpression
-;
-
-ConditionalAndExpression_NotName ::=
-	  InclusiveOrExpression_NotName
-	| ConditionalAndExpression_NotName '&&' InclusiveOrExpression
-	| QualifiedIdentifier '&&' InclusiveOrExpression
-;
-
-ConditionalOrExpression_NotName ::=
-	  ConditionalAndExpression_NotName
-	| ConditionalOrExpression_NotName '||' ConditionalAndExpression
-	| QualifiedIdentifier '||' ConditionalAndExpression
-;
-
-ConditionalExpression_NotName ::=
-	  ConditionalOrExpression_NotName
-	| ConditionalOrExpression_NotName '?' Expression ':' ConditionalExpression
-	| QualifiedIdentifier '?' Expression ':' ConditionalExpression
-;
-
-AssignmentExpression_NotName ::=
-	  ConditionalExpression_NotName
+ExpressionNotName ::=
+	  ConditionalExpressionNotName
 	| Assignment
 ;
-
-Expression_NotName ::=
-	  AssignmentExpression_NotName ;
 
 AnnotationTypeBody ::=
 	  '{' AnnotationTypeMemberDeclaration* '}' ;
@@ -985,8 +870,7 @@ MemberValuePair ::=
 	  Identifier '=' MemberValue ;
 
 MemberValue ::=
-	  ConditionalExpression_NotName
-	| QualifiedIdentifier
+	  ConditionalExpression
 	| Annotation
 	| MemberValueArrayInitializer
 ;

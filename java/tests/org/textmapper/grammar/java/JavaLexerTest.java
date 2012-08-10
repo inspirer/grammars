@@ -169,10 +169,10 @@ public class JavaLexerTest {
                 Lexems.EQUALEQUAL, Lexems.LESSEQUAL, Lexems.GREATEREQUAL, Lexems.EXCLAMATIONEQUAL,
                 Lexems.AMPERSANDAMPERSAND, Lexems.OROR, Lexems.PLUSPLUS, Lexems.MINUSMINUS);
 
-        assertJava("+   -   *   /   &   |   ^   %   <<   >>   >>>",
+        assertJava("+   -   *   /   &   |   ^   %   <<   >>   >>>	@",
                 Lexems.PLUS, Lexems.MINUS, Lexems.MULT, Lexems.SLASH,
                 Lexems.AMPERSAND, Lexems.OR, Lexems.XOR, Lexems.PERCENT,
-                Lexems.LESSLESS, Lexems.GREATERGREATER, Lexems.GREATERGREATERGREATER);
+                Lexems.LESSLESS, Lexems.GREATERGREATER, Lexems.GREATERGREATERGREATER, Lexems.ATSIGN);
 
         assertJava("+=  -=  *=  /=  &=  |=  ^=  %=  <<=  >>=  >>>=",
                 Lexems.PLUSEQUAL, Lexems.MINUSEQUAL, Lexems.MULTEQUAL, Lexems.SLASHEQUAL,

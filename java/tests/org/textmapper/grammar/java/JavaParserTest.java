@@ -4,10 +4,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -173,7 +170,7 @@ public class JavaParserTest {
                         "          'ConvertibleTo' '<' 'T' '>>'\n" +
                         "    ClassBody\n" +
                         "      '{'\n" +
-                        "      ClassBodyDeclarations\n" +
+                        "      ClassBodyDeclaration_optlist\n" +
                         "        FieldDeclaration\n" +
                         "          'T'\n" +
                         "          VariableDeclaratorId\n" +
@@ -199,14 +196,14 @@ public class JavaParserTest {
                         "                    VariableDeclaratorId\n" +
                         "                      'q'\n" +
                         "                    '='\n" +
-                        "                    AdditiveExpression\n" +
-                        "                      IntegerLiteral\n" +
+                        "                    ArithmeticExpressionNotName\n" +
+                        "                      ArithmeticExpressionNotName\n" +
+                        "                        ArithmeticExpressionNotName\n" +
+                        "                          IntegerLiteral '+' IntegerLiteral\n" +
+                        "                        '+'\n" +
+                        "                        IntegerLiteral\n" +
                         "                      '+'\n" +
-                        "                      IntegerLiteral\n" +
-                        "                      '+'\n" +
-                        "                      IntegerLiteral\n" +
-                        "                      '+'\n" +
-                        "                      MultiplicativeExpression\n" +
+                        "                      ArithmeticExpressionNotName\n" +
                         "                        IntegerLiteral '*' IntegerLiteral\n" +
                         "                ';'\n" +
                         "              ExpressionStatement\n" +
@@ -248,41 +245,42 @@ public class JavaParserTest {
                         "  'CollectionConverter'\n" +
                         "  ClassBody\n" +
                         "    '{'\n" +
-                        "    MethodDeclaration\n" +
-                        "      MethodHeader\n" +
-                        "        TypeParameters\n" +
-                        "          '<'\n" +
-                        "          TypeParameter1\n" +
-                        "            'T' '>'\n" +
-                        "        GenericType\n" +
-                        "          'List'\n" +
-                        "          TypeArguments\n" +
-                        "            '<' 'T' '>'\n" +
-                        "        'toList'\n" +
-                        "        '('\n" +
-                        "        FormalParameter\n" +
+                        "    ClassBodyDeclaration_optlist\n" +
+                        "      MethodDeclaration\n" +
+                        "        MethodHeader\n" +
+                        "          TypeParameters\n" +
+                        "            '<'\n" +
+                        "            TypeParameter1\n" +
+                        "              'T' '>'\n" +
                         "          GenericType\n" +
-                        "            'Collection'\n" +
+                        "            'List'\n" +
                         "            TypeArguments\n" +
                         "              '<' 'T' '>'\n" +
-                        "          VariableDeclaratorId\n" +
-                        "            'c'\n" +
-                        "        ')'\n" +
-                        "      MethodBody\n" +
-                        "        '{'\n" +
-                        "        ExpressionStatement\n" +
-                        "          Assignment\n" +
-                        "            'c'\n" +
-                        "            '='\n" +
-                        "            CastExpression\n" +
-                        "              '('\n" +
+                        "          'toList'\n" +
+                        "          '('\n" +
+                        "          FormalParameter\n" +
+                        "            GenericType\n" +
                         "              'Collection'\n" +
                         "              TypeArguments\n" +
-                        "                '<' '?' '>'\n" +
-                        "              ')'\n" +
-                        "              NullLiteral\n" +
-                        "          ';'\n" +
-                        "        '}'\n" +
+                        "                '<' 'T' '>'\n" +
+                        "            VariableDeclaratorId\n" +
+                        "              'c'\n" +
+                        "          ')'\n" +
+                        "        MethodBody\n" +
+                        "          '{'\n" +
+                        "          ExpressionStatement\n" +
+                        "            Assignment\n" +
+                        "              'c'\n" +
+                        "              '='\n" +
+                        "              CastExpression\n" +
+                        "                '('\n" +
+                        "                'Collection'\n" +
+                        "                TypeArguments\n" +
+                        "                  '<' '?' '>'\n" +
+                        "                ')'\n" +
+                        "                NullLiteral\n" +
+                        "            ';'\n" +
+                        "          '}'\n" +
                         "    '}'", tree);
 
     }
@@ -298,7 +296,7 @@ public class JavaParserTest {
                 "  'A'\n" +
                 "  ClassBody\n" +
                 "    '{'\n" +
-                "    ClassBodyDeclarations\n" +
+                "    ClassBodyDeclaration_optlist\n" +
                 "      FieldDeclaration\n" +
                 "        Modifiers\n" +
                 "          kw_static kw_final\n" +
@@ -315,7 +313,7 @@ public class JavaParserTest {
                 "          VariableDeclaratorId\n" +
                 "            'f'\n" +
                 "          '='\n" +
-                "          PrimaryNoNewArray\n" +
+                "          ParenthesizedExpression\n" +
                 "            '('\n" +
                 "            CastExpression\n" +
                 "              '('\n" +
@@ -339,7 +337,7 @@ public class JavaParserTest {
                 "  'A'\n" +
                 "  ClassBody\n" +
                 "    '{'\n" +
-                "    ClassBodyDeclarations\n" +
+                "    ClassBodyDeclaration_optlist\n" +
                 "      FieldDeclaration\n" +
                 "        Modifiers\n" +
                 "          kw_static kw_final\n" +
@@ -356,7 +354,7 @@ public class JavaParserTest {
                 "          VariableDeclaratorId\n" +
                 "            'f'\n" +
                 "          '='\n" +
-                "          PrimaryNoNewArray\n" +
+                "          ParenthesizedExpression\n" +
                 "            '('\n" +
                 "            QualifiedIdentifier\n" +
                 "              'A' '.' 'q'\n" +
@@ -377,7 +375,7 @@ public class JavaParserTest {
                 "  'A'\n" +
                 "  ClassBody\n" +
                 "    '{'\n" +
-                "    ClassBodyDeclarations\n" +
+                "    ClassBodyDeclaration_optlist\n" +
                 "      FieldDeclaration\n" +
                 "        Modifiers\n" +
                 "          kw_static kw_final\n" +
@@ -386,18 +384,21 @@ public class JavaParserTest {
                 "          VariableDeclaratorId\n" +
                 "            'q'\n" +
                 "          '='\n" +
-                "          RelationalExpression\n" +
-                "            ShiftExpression\n" +
-                "              AdditiveExpression\n" +
+                "          RelationalExpressionNotName\n" +
+                "            ArithmeticExpressionNotName\n" +
+                "              ArithmeticExpressionNotName\n" +
                 "                IntegerLiteral '+' IntegerLiteral\n" +
                 "              '<<'\n" +
                 "              IntegerLiteral\n" +
                 "            '<'\n" +
-                "            AdditiveExpression\n" +
+                "            ArithmeticExpressionNotName\n" +
                 "              IntegerLiteral\n" +
                 "              '+'\n" +
-                "              MultiplicativeExpression\n" +
-                "                IntegerLiteral '*' IntegerLiteral '/' IntegerLiteral\n" +
+                "              ArithmeticExpressionNotName\n" +
+                "                ArithmeticExpressionNotName\n" +
+                "                  IntegerLiteral '*' IntegerLiteral\n" +
+                "                '/'\n" +
+                "                IntegerLiteral\n" +
                 "        ';'\n" +
                 "      FieldDeclaration\n" +
                 "        kw_int\n" +
@@ -405,44 +406,45 @@ public class JavaParserTest {
                 "          VariableDeclaratorId\n" +
                 "            'f'\n" +
                 "          '='\n" +
-                "          PrimaryNoNewArray\n" +
+                "          ParenthesizedExpression\n" +
                 "            '('\n" +
-                "            ConditionalExpression_NotName\n" +
+                "            ConditionalExpressionNotName\n" +
                 "              QualifiedIdentifier\n" +
                 "                'A' '.' 'q'\n" +
                 "              '?'\n" +
                 "              IntegerLiteral\n" +
                 "              ':'\n" +
-                "              AdditiveExpression\n" +
-                "                PrimaryNoNewArray\n" +
-                "                  '(' IntegerLiteral ')'\n" +
-                "                '+'\n" +
-                "                MultiplicativeExpression\n" +
-                "                  IntegerLiteral\n" +
-                "                  '*'\n" +
-                "                  FieldAccess\n" +
-                "                    ArrayAccess\n" +
-                "                      PrimaryNoNewArray\n" +
-                "                        '('\n" +
-                "                        CastExpression\n" +
+                "              ArithmeticExpressionNotName\n" +
+                "                ArithmeticExpressionNotName\n" +
+                "                  ParenthesizedExpression\n" +
+                "                    '(' IntegerLiteral ')'\n" +
+                "                  '+'\n" +
+                "                  ArithmeticExpressionNotName\n" +
+                "                    IntegerLiteral\n" +
+                "                    '*'\n" +
+                "                    FieldAccess\n" +
+                "                      ArrayAccess\n" +
+                "                        ParenthesizedExpression\n" +
                 "                          '('\n" +
-                "                          'A'\n" +
-                "                          Dims$1\n" +
-                "                            '[' ']'\n" +
+                "                          CastExpression\n" +
+                "                            '('\n" +
+                "                            'A'\n" +
+                "                            Dims$1\n" +
+                "                              '[' ']'\n" +
+                "                            ')'\n" +
+                "                            ParenthesizedExpression\n" +
+                "                              '(' NullLiteral ')'\n" +
                 "                          ')'\n" +
-                "                          PrimaryNoNewArray\n" +
-                "                            '(' NullLiteral ')'\n" +
-                "                        ')'\n" +
-                "                      '['\n" +
-                "                      IntegerLiteral\n" +
-                "                      ']'\n" +
-                "                    '.'\n" +
-                "                    'f'\n" +
+                "                        '['\n" +
+                "                        IntegerLiteral\n" +
+                "                        ']'\n" +
+                "                      '.'\n" +
+                "                      'f'\n" +
                 "                '+'\n" +
-                "                PrimaryNoNewArray\n" +
+                "                ParenthesizedExpression\n" +
                 "                  '('\n" +
-                "                  ConditionalExpression_NotName\n" +
-                "                    InstanceofExpression_NotName\n" +
+                "                  ConditionalExpressionNotName\n" +
+                "                    RelationalExpressionNotName\n" +
                 "                      kw_this kw_instanceof 'A'\n" +
                 "                    '?'\n" +
                 "                    IntegerLiteral\n" +
@@ -493,6 +495,14 @@ public class JavaParserTest {
         return recorder.getRoot();
     }
 
+    private static Set<String> doNotMerge = new HashSet<String>();
+
+    static {
+        doNotMerge.add("ArithmeticExpressionNotName");
+        doNotMerge.add("RelationalExpressionNotName");
+        doNotMerge.add("LogicalExpressionNotName");
+    }
+
     private static class TreeRecorder {
 
         private Stack<AstNode> stack = new Stack<AstNode>();
@@ -506,7 +516,7 @@ public class JavaParserTest {
             if (node.children != null) {
                 Collections.reverse(node.children);
             }
-            if (node.children != null && node.children.get(0).symbol.equals(symbol)) {
+            if (node.children != null && node.children.get(0).symbol.equals(symbol) && !doNotMerge.contains(node.symbol)) {
                 // flatten lists
                 AstNode first = node.children.get(0);
                 node.children.remove(first);
