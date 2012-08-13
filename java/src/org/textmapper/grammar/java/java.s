@@ -378,7 +378,7 @@ CatchType ::=
 	  (Type separator '|')+ ;
 
 MethodBody ::=
-	  '{' BlockStatementsopt '}'  ;
+	  Block ;
 
 StaticInitializer ::=
 	  kw_static Block ;
@@ -390,9 +390,7 @@ ExplicitConstructorInvocation ::=
 	  ExplicitConstructorId '(' (Expression separator ',')* ')' ';' ;
 
 ExplicitConstructorId ::=
-	  (Primary '.')? TypeArguments? ThisOrSuper
-	| QualifiedIdentifier '.' TypeArguments? ThisOrSuper
-;
+	  (Primary '.' | QualifiedIdentifier '.')? TypeArguments? ThisOrSuper ;
 
 ThisOrSuper ::=
 	  kw_this | kw_super ;
@@ -418,12 +416,7 @@ ArrayInitializer ::=
 	  '{' (VariableInitializer separator ',')+? ','? '}' ;
 
 Block ::=
-	  '{' BlockStatementsopt '}' ;
-
-BlockStatements ::=
-	  BlockStatement
-	| BlockStatements BlockStatement
-;
+	  '{' BlockStatement* '}' ;
 
 BlockStatement ::=
 	  LocalVariableDeclarationStatement
@@ -496,7 +489,7 @@ SwitchBlock ::=
 	  '{' SwitchBlockStatementGroup* SwitchLabel+? '}' ;
 
 SwitchBlockStatementGroup ::=
-	SwitchLabel+ BlockStatements ;
+	SwitchLabel+ BlockStatement+ ;
 
 SwitchLabel ::=
 	  kw_case ConstantExpression ':'
@@ -575,18 +568,19 @@ ParenthesizedExpression ::=
 ;
 
 ClassInstanceCreationExpression ::=
-	  (Primary '.')? kw_new TypeArguments? ClassType '(' (Expression separator ',')* ')' ClassBodyopt
-	| QualifiedIdentifier '.' kw_new TypeArguments? ClassType '(' (Expression separator ',')* ')' ClassBodyopt
+	  (Primary '.' | QualifiedIdentifier '.')? kw_new TypeArguments? ClassType '(' (Expression separator ',')* ')' ClassBodyopt ;
+
+NonArrayType ::=
+	  PrimitiveType
+	| ClassOrInterfaceType
 ;
 
 ArrayCreationWithoutArrayInitializer ::=
-	  kw_new PrimitiveType DimWithOrWithOutExpr+
-	| kw_new ClassOrInterfaceType DimWithOrWithOutExpr+
+	  kw_new NonArrayType DimWithOrWithOutExpr+
 ;
 
 ArrayCreationWithArrayInitializer ::=
-	  kw_new PrimitiveType DimWithOrWithOutExpr+ ArrayInitializer
-	| kw_new ClassOrInterfaceType DimWithOrWithOutExpr+ ArrayInitializer
+	  kw_new NonArrayType DimWithOrWithOutExpr+ ArrayInitializer
 ;
 
 DimWithOrWithOutExpr ::=
