@@ -185,12 +185,12 @@ public class JavaLexerTest {
             JavaLexer javaLexer = new JavaLexer(new StringReader(text), testReporter());
             LapgSymbol next;
             int index = 0;
-            while ((next = javaLexer.next()).lexem != Lexems.eoi) {
+            while ((next = javaLexer.next()).symbol != Lexems.eoi) {
                 if (lexems.length == index) {
-                    fail("unexpected lexem after eoi: " + next.lexem + "(" + text.substring(next.offset, next.endoffset) + ")");
+                    fail("unexpected lexem after eoi: " + next.symbol + "(" + text.substring(next.offset, next.endoffset) + ")");
                 }
-                if (lexems[index] != next.lexem) {
-                    fail(next.line + ": got " + next.lexem + "(" + text.substring(next.offset, next.endoffset) + ") instead of " + lexems[index]);
+                if (lexems[index] != next.symbol) {
+                    fail(next.line + ": got " + next.symbol + "(" + text.substring(next.offset, next.endoffset) + ") instead of " + lexems[index]);
                 }
                 index++;
             }
@@ -216,12 +216,12 @@ public class JavaLexerTest {
             };
             LapgSymbol next;
             int index = 0;
-            while ((next = javaLexer.next()).lexem != Lexems.eoi) {
+            while ((next = javaLexer.next()).symbol != Lexems.eoi) {
                 if (lexems.length == index) {
-                    fail("unexpected lexem after eoi: " + next.lexem + "(" + text.substring(next.offset, next.endoffset) + ")");
+                    fail("unexpected lexem after eoi: " + next.symbol + "(" + text.substring(next.offset, next.endoffset) + ")");
                 }
-                if (lexems[index] != next.lexem) {
-                    fail(next.line + ": got " + next.lexem + "(" + text.substring(next.offset, next.endoffset) + ") instead of " + lexems[index]);
+                if (lexems[index] != next.symbol) {
+                    fail(next.line + ": got " + next.symbol + "(" + text.substring(next.offset, next.endoffset) + ") instead of " + lexems[index]);
                 }
                 index++;
             }

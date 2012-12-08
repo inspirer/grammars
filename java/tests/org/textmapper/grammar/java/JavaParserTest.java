@@ -476,12 +476,12 @@ public class JavaParserTest {
                 super.reduce(rule);
                 int rulelen = lapg_head - before + 1;
                 JavaLexer.LapgSymbol r = lapg_m[lapg_head];
-                recorder.add(lapg_syms[r.lexem], text.substring(r.offset, r.endoffset), r.offset, r.endoffset, rulelen == 1);
+                recorder.add(lapg_syms[r.symbol], text.substring(r.offset, r.endoffset), r.offset, r.endoffset, rulelen == 1);
             }
 
             @Override
             protected void shift() throws IOException {
-                recorder.add(lapg_syms[lapg_n.lexem], text.substring(lapg_n.offset, lapg_n.endoffset), lapg_n.offset, lapg_n.endoffset, false);
+                recorder.add(lapg_syms[lapg_n.symbol], text.substring(lapg_n.offset, lapg_n.endoffset), lapg_n.offset, lapg_n.endoffset, false);
                 super.shift();
             }
         };

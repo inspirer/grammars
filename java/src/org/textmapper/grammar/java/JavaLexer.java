@@ -9,8 +9,8 @@ import java.util.Map;
 public class JavaLexer {
 
 	public static class LapgSymbol {
-		public Object sym;
-		public int lexem;
+		public Object value;
+		public int symbol;
 		public int state;
 		public int line;
 		public int offset;
@@ -142,7 +142,7 @@ public class JavaLexer {
 	private int datalen, l, tokenStart;
 	private char chr;
 
-	private int group;
+	private int state;
 
 	final private StringBuilder token = new StringBuilder(TOKEN_SIZE);
 
@@ -157,7 +157,7 @@ public class JavaLexer {
 
 	public void reset(Reader stream) throws IOException {
 		this.stream = stream;
-		this.group = 0;
+		this.state = 0;
 		datalen = stream.read(data);
 		l = 0;
 		tokenStart = -1;
@@ -182,11 +182,11 @@ public class JavaLexer {
 	}
 
 	public int getState() {
-		return group;
+		return state;
 	}
 
 	public void setState(int state) {
-		this.group = state;
+		this.state = state;
 	}
 
 	public int getTokenLine() {
@@ -424,12 +424,12 @@ public class JavaLexer {
 			token.setLength(0);
 			tokenStart = l - 1;
 
-			for (state = group; state >= 0; ) {
+			for (state = this.state; state >= 0; ) {
 				state = lapg_lexem[state * 53 + mapCharacter(chr)];
 				if (state == -1 && chr == 0) {
 					lapg_n.endoffset = currOffset;
-					lapg_n.lexem = 0;
-					lapg_n.sym = null;
+					lapg_n.symbol = 0;
+					lapg_n.value = null;
 					reporter.error(lapg_n.offset, lapg_n.endoffset, lapg_n.line, "Unexpected end of input reached");
 					tokenStart = -1;
 					return lapg_n;
@@ -453,14 +453,14 @@ public class JavaLexer {
 				if (l - 1 > tokenStart) {
 					token.append(data, tokenStart, l - 1 - tokenStart);
 				}
-				reporter.error(lapg_n.offset, lapg_n.endoffset, lapg_n.line, MessageFormat.format("invalid lexem at line {0}: `{1}`, skipped", currLine, current()));
-				lapg_n.lexem = -1;
+				reporter.error(lapg_n.offset, lapg_n.endoffset, lapg_n.line, MessageFormat.format("invalid lexeme at line {0}: `{1}`, skipped", currLine, current()));
+				lapg_n.symbol = -1;
 				continue;
 			}
 
 			if (state == -2) {
-				lapg_n.lexem = 0;
-				lapg_n.sym = null;
+				lapg_n.symbol = 0;
+				lapg_n.value = null;
 				tokenStart = -1;
 				return lapg_n;
 			}
@@ -469,26 +469,30 @@ public class JavaLexer {
 				token.append(data, tokenStart, l - 1 - tokenStart);
 			}
 
-			lapg_n.lexem = lapg_lexemnum[-state - 3];
-			lapg_n.sym = null;
+			lapg_n.symbol = lapg_lexemnum[-state - 3];
+			lapg_n.value = null;
 
-		} while (lapg_n.lexem == -1 || !createToken(lapg_n, -state - 3));
+		} while (lapg_n.symbol == -1 || !createToken(lapg_n, -state - 3));
 		tokenStart = -1;
 		return lapg_n;
 	}
 
 	protected boolean createToken(LapgSymbol lapg_n, int lexemIndex) throws IOException {
+		boolean spaceToken = false;
 		switch (lexemIndex) {
 			case 0:
 				return createIdentifierToken(lapg_n, lexemIndex);
-			case 2:
-				return false;
-			case 3:
-				return false;
-			case 4:
-				return false;
+			case 2: // WhiteSpace: /[\r\n\t\f ]|\r\n/
+				spaceToken = true;
+				break;
+			case 3: // EndOfLineComment: /\/\/[^\r\n]*/
+				spaceToken = true;
+				break;
+			case 4: // TraditionalComment: /\/\*([^*]|\*+[^\/*])*\*+\//
+				spaceToken = true;
+				break;
 		}
-		return true;
+		return !(spaceToken);
 	}
 
 	private static Map<String,Integer> subTokensOfIdentifier = new HashMap<String,Integer>();
@@ -552,7 +556,7 @@ public class JavaLexer {
 		Integer replacement = subTokensOfIdentifier.get(current());
 		if (replacement != null) {
 			lexemIndex = replacement;
-			lapg_n.lexem = lapg_lexemnum[lexemIndex];
+			lapg_n.symbol = lapg_lexemnum[lexemIndex];
 		}
 		return true;
 	}
