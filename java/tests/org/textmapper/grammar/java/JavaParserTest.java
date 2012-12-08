@@ -186,9 +186,9 @@ public class JavaParserTest {
                         "              VariableDeclaratorId\n" +
                         "                's'\n" +
                         "            ')'\n" +
-                        "          MethodBody\n" +
+                        "          Block\n" +
                         "            '{'\n" +
-                        "            BlockStatements\n" +
+                        "            BlockStatement_optlist\n" +
                         "              LocalVariableDeclarationStatement\n" +
                         "                LocalVariableDeclaration\n" +
                         "                  kw_int\n" +
@@ -220,16 +220,17 @@ public class JavaParserTest {
                         "        MethodDeclaration\n" +
                         "          MethodHeader\n" +
                         "            'S' 'get' '(' ')'\n" +
-                        "          MethodBody\n" +
+                        "          Block\n" +
                         "            '{'\n" +
-                        "            ReturnStatement\n" +
-                        "              kw_return\n" +
-                        "              MethodInvocation\n" +
-                        "                QualifiedIdentifier\n" +
-                        "                  't' '.' 'convert'\n" +
-                        "                '('\n" +
-                        "                ')'\n" +
-                        "              ';'\n" +
+                        "            BlockStatement_optlist\n" +
+                        "              ReturnStatement\n" +
+                        "                kw_return\n" +
+                        "                MethodInvocation\n" +
+                        "                  QualifiedIdentifier\n" +
+                        "                    't' '.' 'convert'\n" +
+                        "                  '('\n" +
+                        "                  ')'\n" +
+                        "                ';'\n" +
                         "            '}'\n" +
                         "      '}'", tree);
     }
@@ -266,20 +267,21 @@ public class JavaParserTest {
                         "            VariableDeclaratorId\n" +
                         "              'c'\n" +
                         "          ')'\n" +
-                        "        MethodBody\n" +
+                        "        Block\n" +
                         "          '{'\n" +
-                        "          ExpressionStatement\n" +
-                        "            Assignment\n" +
-                        "              'c'\n" +
-                        "              '='\n" +
-                        "              CastExpression\n" +
-                        "                '('\n" +
-                        "                'Collection'\n" +
-                        "                TypeArguments\n" +
-                        "                  '<' '?' '>'\n" +
-                        "                ')'\n" +
-                        "                NullLiteral\n" +
-                        "            ';'\n" +
+                        "          BlockStatement_optlist\n" +
+                        "            ExpressionStatement\n" +
+                        "              Assignment\n" +
+                        "                'c'\n" +
+                        "                '='\n" +
+                        "                CastExpression\n" +
+                        "                  '('\n" +
+                        "                  'Collection'\n" +
+                        "                  TypeArguments\n" +
+                        "                    '<' '?' '>'\n" +
+                        "                  ')'\n" +
+                        "                  NullLiteral\n" +
+                        "              ';'\n" +
                         "          '}'\n" +
                         "    '}'", tree);
 
